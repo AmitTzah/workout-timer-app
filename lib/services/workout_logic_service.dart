@@ -18,6 +18,7 @@ class WorkoutLogicService {
   late List<WorkoutSet> _exercisesToPerform;
   int _currentOverallSetIndex = 0;
   int _totalSetsCompleted = 0;
+  int _totalExerciseSets = 0;
 
   // Public getters for previously private members
   dynamic get selectedLevelOrMode => _selectedLevelOrMode;
@@ -45,7 +46,7 @@ class WorkoutLogicService {
           ? _exercisesToPerform[_currentOverallSetIndex]
           : null;
 
-  int get totalSetsInSequence => _exercisesToPerform.length;
+  int get totalSetsInSequence => _totalExerciseSets;
 
   /// Calculates the total expected duration of the workout including rest periods.
   int get totalWorkoutDurationWithRests {
@@ -149,12 +150,17 @@ class WorkoutLogicService {
     }
 
     _exercisesToPerform = sequence;
+    _totalExerciseSets =
+        sequence.where((set) => !set.isRestSet).length;
   }
 
   /// Advances to the next set in the workout sequence.
   /// Returns true if the workout continues, false if it has naturally completed.
   bool moveToNextSet() {
-    _totalSetsCompleted++; // Increment for the set that just finished
+    // Only increment total sets completed if the set that just finished was not a rest set.
+    if (currentWorkoutSet != null && !currentWorkoutSet!.isRestSet) {
+      _totalSetsCompleted++;
+    }
     bool workoutContinues = true;
 
     if (_currentOverallSetIndex < _exercisesToPerform.length - 1) {
