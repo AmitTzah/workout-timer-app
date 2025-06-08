@@ -82,7 +82,9 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
     if (newExercise != null) {
       setState(() {
         if (_workoutType == WorkoutType.sequential) {
-          _workoutItems.add(ExerciseItem(id: const Uuid().v4(), exercise: newExercise));
+          _workoutItems.add(
+            ExerciseItem(id: const Uuid().v4(), exercise: newExercise),
+          );
         } else {
           AlternatingGroupItem? lastGroup;
           if (_workoutItems.isNotEmpty &&
@@ -140,7 +142,10 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
                 if (duration != null && duration > 0) {
                   setState(() {
                     _workoutItems.add(
-                      RestBlockItem(id: const Uuid().v4(), durationInSeconds: duration),
+                      RestBlockItem(
+                        id: const Uuid().v4(),
+                        durationInSeconds: duration,
+                      ),
                     );
                   });
                   Navigator.of(context).pop();
@@ -196,20 +201,41 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
       final TextEditingController restTimeController = TextEditingController(
         text: exerciseToEdit.restTimeInSeconds?.toString() ?? '',
       );
+      String selectedExerciseName = exerciseToEdit.name;
 
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text('Edit ${exerciseToEdit.name}'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: setsController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'Sets'),
-                ),
+            content: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DropdownButtonFormField<String>(
+                      value: selectedExerciseName,
+                      items: _predefinedExercises.map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        if (newValue != null) {
+                          setState(() {
+                            selectedExerciseName = newValue;
+                          });
+                        }
+                      },
+                      decoration:
+                          const InputDecoration(labelText: 'Exercise Name'),
+                    ),
+                    TextField(
+                      controller: setsController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(labelText: 'Sets'),
+                    ),
                 TextField(
                   controller: repsController,
                   keyboardType: TextInputType.number,
@@ -232,7 +258,9 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
                   ),
                 ),
               ],
-            ),
+            );
+          },
+        ),
             actions: <Widget>[
               TextButton(
                 child: const Text('Cancel'),
@@ -261,7 +289,7 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
                         id: exerciseToEdit.id, // Pass existing ID
                         exercise: Exercise(
                           id: exerciseToEdit.id, // Pass existing ID
-                          name: exerciseToEdit.name,
+                          name: selectedExerciseName,
                           sets: newSets,
                           reps: newReps,
                           workTimeInSeconds: newWorkTime,
@@ -348,7 +376,9 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
 
   // Helper to get the actual index of an AlternatingGroupItem in _workoutItems
   int _getActualGroupIndex(String groupId) {
-    return _workoutItems.indexWhere((item) => item is AlternatingGroupItem && item.id == groupId);
+    return _workoutItems.indexWhere(
+      (item) => item is AlternatingGroupItem && item.id == groupId,
+    );
   }
 
   void _onReorderItems(int oldIndex, int newIndex) {
@@ -414,10 +444,7 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
     });
   }
 
-  void _onRemoveExerciseFromGroup(
-    String groupId,
-    int exerciseIndex,
-  ) {
+  void _onRemoveExerciseFromGroup(String groupId, int exerciseIndex) {
     setState(() {
       final int actualGroupIndex = _getActualGroupIndex(groupId);
       if (actualGroupIndex != -1) {
@@ -454,7 +481,12 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
     });
   }
 
-  void _onEditGroup(String id, String newName, int newCycles, int? newGroupRest) {
+  void _onEditGroup(
+    String id,
+    String newName,
+    int newCycles,
+    int? newGroupRest,
+  ) {
     setState(() {
       final int index = _workoutItems.indexWhere((item) => item.id == id);
       if (index != -1 && _workoutItems[index] is AlternatingGroupItem) {
@@ -472,7 +504,8 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
       if (item is ExerciseItem) {
         totalDuration += item.exercise.sets * item.exercise.workTimeInSeconds;
         if (item.exercise.restTimeInSeconds != null && item.exercise.sets > 1) {
-          totalDuration += (item.exercise.sets - 1) * item.exercise.restTimeInSeconds!;
+          totalDuration +=
+              (item.exercise.sets - 1) * item.exercise.restTimeInSeconds!;
         }
       } else if (item is RestBlockItem) {
         totalDuration += item.durationInSeconds;
@@ -482,11 +515,12 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
           final exercise = item.exercises[i];
           singleCycleDuration += exercise.workTimeInSeconds;
           // Add rest time only if it's not the last exercise in the cycle
-          if (exercise.restTimeInSeconds != null && i < item.exercises.length - 1) {
+          if (exercise.restTimeInSeconds != null &&
+              i < item.exercises.length - 1) {
             singleCycleDuration += exercise.restTimeInSeconds!;
           }
         }
-        
+
         totalDuration += singleCycleDuration * item.cycles;
 
         // Add group rest for each cycle except the last one
@@ -524,9 +558,7 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
   Future<void> _saveWorkout() async {
     if (_workoutNameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a workout name.'),
-        ),
+        const SnackBar(content: Text('Please enter a workout name.')),
       );
       return;
     }
@@ -597,7 +629,9 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
                     value: WorkoutType.sequential,
                     label: const Text('Sequential'),
                     icon: Opacity(
-                      opacity: _workoutType == WorkoutType.sequential ? 1.0 : 0.0,
+                      opacity: _workoutType == WorkoutType.sequential
+                          ? 1.0
+                          : 0.0,
                       child: const Icon(Icons.check),
                     ),
                   ),
@@ -605,7 +639,9 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
                     value: WorkoutType.alternating,
                     label: const Text('Alternating'),
                     icon: Opacity(
-                      opacity: _workoutType == WorkoutType.alternating ? 1.0 : 0.0,
+                      opacity: _workoutType == WorkoutType.alternating
+                          ? 1.0
+                          : 0.0,
                       child: const Icon(Icons.check),
                     ),
                   ),
