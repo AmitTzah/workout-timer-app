@@ -4,7 +4,7 @@ import 'package:exercise_timer_app/models/user_workout.dart';
 import 'package:exercise_timer_app/repositories/user_workout_repository.dart'; // Use the new repository
 import 'package:exercise_timer_app/screens/define_workout_screen.dart';
 import 'package:exercise_timer_app/screens/workout_summaries_screen.dart';
-import 'package:exercise_timer_app/widgets/workout_card.dart';
+import 'package:exercise_timer_app/widgets/workout_card/workout_card.dart';
 import 'package:exercise_timer_app/widgets/level_selection_bottom_sheet.dart';
 
 class HomeScreen extends StatefulWidget {
