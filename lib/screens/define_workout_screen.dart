@@ -520,6 +520,15 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
   }
 
   Future<void> _saveWorkout() async {
+    if (_workoutNameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a workout name.'),
+        ),
+      );
+      return;
+    }
+
     if (_formKey.currentState!.validate()) {
       if (_workoutItems.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
