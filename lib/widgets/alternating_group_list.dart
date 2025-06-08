@@ -66,8 +66,8 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
                             onTap: () async {
                               await _showEditGroupNameDialog(context, group);
                             },
-                            splashColor: Theme.of(context).colorScheme.primary.withOpacity(0.1), // Visible splash
-                            highlightColor: Theme.of(context).colorScheme.primary.withOpacity(0.05), // Visible highlight
+                            splashColor: Theme.of(context).colorScheme.primary.withAlpha((255 * 0.3).round()), // Increased opacity
+                            highlightColor: Theme.of(context).colorScheme.primary.withAlpha((255 * 0.15).round()), // Increased opacity
                             borderRadius: BorderRadius.circular(8.0), // Add border radius
                             child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0), // Add some padding for better tap area
@@ -102,20 +102,21 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
                       // Layout for Cycles and Rest between cycles, with main edit icon for group
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Row( // Changed from Wrap to Row
-                          mainAxisAlignment: MainAxisAlignment.spaceAround, // Keep space around for distribution
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround, // Reverted to spaceAround to distribute the two centered columns
                           children: [
-                            Flexible( // Use Flexible instead of Expanded
+                            Center( // Explicitly center the Cycles column
                               child: InkWell(
                                 onTap: () async {
                                   await _showEditCyclesDialog(context, group);
                                 },
-                                splashColor: Theme.of(context).colorScheme.primary.withOpacity(0.1), // Visible splash
-                                highlightColor: Theme.of(context).colorScheme.primary.withOpacity(0.05), // Visible highlight
-                                borderRadius: BorderRadius.circular(8.0), // Add border radius
+                                splashColor: Theme.of(context).colorScheme.primary.withAlpha((255 * 0.3).round()),
+                                highlightColor: Theme.of(context).colorScheme.primary.withAlpha((255 * 0.15).round()),
+                                borderRadius: BorderRadius.circular(8.0),
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
                                   child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
                                     Row(
                                       mainAxisSize: MainAxisSize.min,
@@ -134,17 +135,18 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
                                 ),
                               ),
                             ),
-                            Flexible( // Use Flexible instead of Expanded
+                            Center( // Explicitly center the Rest Between Cycles column
                               child: InkWell(
                                 onTap: () async {
                                   await _showEditGroupRestDialog(context, group);
                                 },
-                                splashColor: Theme.of(context).colorScheme.primary.withOpacity(0.1), // Visible splash
-                                highlightColor: Theme.of(context).colorScheme.primary.withOpacity(0.05), // Visible highlight
-                                borderRadius: BorderRadius.circular(8.0), // Add border radius
+                                splashColor: Theme.of(context).colorScheme.primary.withAlpha((255 * 0.3).round()),
+                                highlightColor: Theme.of(context).colorScheme.primary.withAlpha((255 * 0.15).round()),
+                                borderRadius: BorderRadius.circular(8.0),
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
                                   child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
                                       Row(
                                         mainAxisSize: MainAxisSize.min,
