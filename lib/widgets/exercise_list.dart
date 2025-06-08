@@ -31,6 +31,7 @@ class ExerciseList extends StatelessWidget {
             key: ValueKey(exercise.id), // Use exercise ID for key
             margin: const EdgeInsets.symmetric(vertical: 4.0),
             child: ListTile(
+              leading: const Icon(Icons.drag_handle), // Drag handle
               title: Text(exercise.name),
               subtitle: Text(
                 'Sets: ${exercise.sets}'
@@ -59,6 +60,7 @@ class ExerciseList extends StatelessWidget {
             color: Colors.grey[200],
             margin: const EdgeInsets.symmetric(vertical: 4.0),
             child: ListTile(
+              leading: const Icon(Icons.drag_handle), // Drag handle
               title: const Text('Rest Block'),
               subtitle: Text('Duration: ${item.durationInSeconds} seconds'),
               trailing: Row(
