@@ -62,22 +62,34 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            group.name,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                          InkWell(
+                            onTap: () async {
+                              await _showEditGroupNameDialog(context, group);
+                            },
+                            splashColor: Theme.of(context).colorScheme.primary.withOpacity(0.1), // Visible splash
+                            highlightColor: Theme.of(context).colorScheme.primary.withOpacity(0.05), // Visible highlight
+                            borderRadius: BorderRadius.circular(8.0), // Add border radius
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0), // Add some padding for better tap area
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    group.name,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  const Icon(Icons.edit, size: 18),
+                                ],
+                              ),
                             ),
                           ),
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit),
-                                onPressed: () async {
-                                  await _showEditGroupDialog(context, group);
-                                },
-                              ),
                               IconButton(
                                 icon: const Icon(Icons.delete),
                                 onPressed: () => widget.onRemoveItem(group.id),
@@ -90,29 +102,65 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
                       // Layout for Cycles and Rest between cycles, with main edit icon for group
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        child: Row( // Changed from Wrap to Row
+                          mainAxisAlignment: MainAxisAlignment.spaceAround, // Keep space around for distribution
                           children: [
-                            Expanded(
-                              child: Column(
-                                children: [
-                                  const Text(
-                                    'Cycles',
-                                    style: TextStyle(fontWeight: FontWeight.bold),
+                            Flexible( // Use Flexible instead of Expanded
+                              child: InkWell(
+                                onTap: () async {
+                                  await _showEditCyclesDialog(context, group);
+                                },
+                                splashColor: Theme.of(context).colorScheme.primary.withOpacity(0.1), // Visible splash
+                                highlightColor: Theme.of(context).colorScheme.primary.withOpacity(0.05), // Visible highlight
+                                borderRadius: BorderRadius.circular(8.0), // Add border radius
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                                  child: Column(
+                                    children: [
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Text(
+                                          'Cycles',
+                                          style: TextStyle(fontWeight: FontWeight.bold),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        const Icon(Icons.edit, size: 16),
+                                      ],
+                                    ),
+                                    Text('${group.cycles}'),
+                                    ],
                                   ),
-                                  Text('${group.cycles}'),
-                                ],
+                                ),
                               ),
                             ),
-                            Expanded(
-                              child: Column(
-                                children: [
-                                  const Text(
-                                    'Rest Between Cycles',
-                                    style: TextStyle(fontWeight: FontWeight.bold),
+                            Flexible( // Use Flexible instead of Expanded
+                              child: InkWell(
+                                onTap: () async {
+                                  await _showEditGroupRestDialog(context, group);
+                                },
+                                splashColor: Theme.of(context).colorScheme.primary.withOpacity(0.1), // Visible splash
+                                highlightColor: Theme.of(context).colorScheme.primary.withOpacity(0.05), // Visible highlight
+                                borderRadius: BorderRadius.circular(8.0), // Add border radius
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Text(
+                                            'Rest Between Cycles',
+                                            style: TextStyle(fontWeight: FontWeight.bold),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          const Icon(Icons.edit, size: 16),
+                                        ],
+                                      ),
+                                      Text('${group.groupRestInSeconds ?? 0}s'),
+                                    ],
                                   ),
-                                  Text('${group.groupRestInSeconds ?? 0}s'),
-                                ],
+                                ),
                               ),
                             ),
                           ],
@@ -383,34 +431,17 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
     );
   }
 
-  Future<void> _showEditGroupDialog(BuildContext context, AlternatingGroupItem group) async {
+  Future<void> _showEditGroupNameDialog(BuildContext context, AlternatingGroupItem group) async {
     final TextEditingController nameController = TextEditingController(text: group.name);
-    final TextEditingController cyclesController = TextEditingController(text: group.cycles.toString());
-    final TextEditingController groupRestController = TextEditingController(text: group.groupRestInSeconds?.toString() ?? '');
 
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Edit Alternating Group'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Group Name'),
-              ),
-              TextField(
-                controller: cyclesController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Cycles'),
-              ),
-              TextField(
-                controller: groupRestController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Rest between cycles (seconds, Optional)'),
-              ),
-            ],
+          title: const Text('Edit Group Name'),
+          content: TextField(
+            controller: nameController,
+            decoration: const InputDecoration(labelText: 'Group Name'),
           ),
           actions: <Widget>[
             TextButton(
@@ -423,16 +454,97 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
               child: const Text('Save'),
               onPressed: () {
                 final String newName = nameController.text.trim();
-                final int? newCycles = int.tryParse(cyclesController.text.trim());
-                final int? newGroupRest = int.tryParse(groupRestController.text.trim());
-
-                if (newName.isNotEmpty && newCycles != null && newCycles > 0) {
-                  widget.onEditGroup(group.id, newName, newCycles, newGroupRest);
+                if (newName.isNotEmpty) {
+                  widget.onEditGroup(group.id, newName, group.cycles, group.groupRestInSeconds);
                   Navigator.of(context).pop();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Please enter a valid group name and cycles.'),
+                      content: Text('Group name cannot be empty.'),
+                    ),
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showEditCyclesDialog(BuildContext context, AlternatingGroupItem group) async {
+    final TextEditingController cyclesController = TextEditingController(text: group.cycles.toString());
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Edit Cycles'),
+          content: TextField(
+            controller: cyclesController,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(labelText: 'Cycles'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Save'),
+              onPressed: () {
+                final int? newCycles = int.tryParse(cyclesController.text.trim());
+                if (newCycles != null && newCycles > 0) {
+                  widget.onEditGroup(group.id, group.name, newCycles, group.groupRestInSeconds);
+                  Navigator.of(context).pop();
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please enter a valid number of cycles.'),
+                    ),
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showEditGroupRestDialog(BuildContext context, AlternatingGroupItem group) async {
+    final TextEditingController groupRestController = TextEditingController(text: group.groupRestInSeconds?.toString() ?? '');
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Edit Rest Between Cycles'),
+          content: TextField(
+            controller: groupRestController,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(labelText: 'Rest between cycles (seconds, Optional)'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Save'),
+              onPressed: () {
+                final int? newGroupRest = int.tryParse(groupRestController.text.trim());
+                if (newGroupRest != null && newGroupRest >= 0) {
+                  widget.onEditGroup(group.id, group.name, group.cycles, newGroupRest);
+                  Navigator.of(context).pop();
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please enter a valid rest time (0 or greater).'),
                     ),
                   );
                 }
