@@ -1,36 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:exercise_timer_app/models/user_workout.dart';
-import 'package:exercise_timer_app/models/workout_item.dart'; // Import WorkoutItem
+import 'package:exercise_timer_app/models/workout_item.dart';
+import 'package:exercise_timer_app/models/alternating_group_item.dart';
+import 'package:exercise_timer_app/models/workout_type.dart';
 
 class LevelSelectionBottomSheet {
   static Future<dynamic> show(BuildContext context, dynamic currentLevel, UserWorkout workout) async {
-    // Helper to calculate total sets for a given level, ensuring strict increase
-    int calculateTotalSetsForLevel(int level) {
-      int totalOriginalSets = workout.items.fold(0, (sum, item) {
-        if (item is ExerciseItem) {
-          return sum + item.exercise.sets;
+    bool isAlternating = workout.workoutType == WorkoutType.alternating;
+    String unit = isAlternating ? 'Cycles' : 'Sets';
+
+    // Helper to calculate total units (sets or cycles) for a given level
+    int calculateTotalUnitsForLevel(int level) {
+      int totalOriginalUnits = workout.items.fold(0, (sum, item) {
+        if (isAlternating) {
+          if (item is AlternatingGroupItem) {
+            return sum + item.cycles;
+          }
+        } else {
+          if (item is ExerciseItem) {
+            return sum + item.exercise.sets;
+          }
         }
         return sum;
       });
-      if (totalOriginalSets == 0) return 0; // Handle empty workout
 
-      double multiplier;
-      if (level == 1) {
-        multiplier = 1.0;
-      } else {
-        multiplier = 1.0 + ((level - 1) * 20) / 100.0; // Changed to 20% increment
-      }
+      if (totalOriginalUnits == 0) return 0;
 
-      int calculatedSets = (totalOriginalSets * multiplier).ceil();
+      double multiplier = 1.0 + ((level - 1) * 20) / 100.0;
+      if (level == 1) multiplier = 1.0;
 
-      // Ensure strict increase for total sets compared to previous level
+      int calculatedUnits = (totalOriginalUnits * multiplier).ceil();
+
       if (level > 1) {
-        int previousLevelSets = calculateTotalSetsForLevel(level - 1); // Recursive call
-        if (calculatedSets <= previousLevelSets) {
-          calculatedSets = previousLevelSets + 1; // Force an increment
+        int previousLevelUnits = calculateTotalUnitsForLevel(level - 1);
+        if (calculatedUnits <= previousLevelUnits) {
+          calculatedUnits = previousLevelUnits + 1;
         }
       }
-      return calculatedSets;
+      return calculatedUnits;
     }
 
     return showModalBottomSheet(
@@ -51,10 +58,10 @@ class LevelSelectionBottomSheet {
                 child: ListView(
                   shrinkWrap: true,
                   children: [
-                    for (int i = 1; i <= 10; i++) // Changed to 10 levels
+                    for (int i = 1; i <= 10; i++)
                       ListTile(
                         title: Text(
-                          'Level $i (+${i == 1 ? 0 : ((i - 1) * 20)}%) - Total Sets: ${calculateTotalSetsForLevel(i)}', // Updated percentage
+                          'Level $i (+${i == 1 ? 0 : ((i - 1) * 20)}%) - Total $unit: ${calculateTotalUnitsForLevel(i)}',
                         ),
                         trailing: i == currentLevel ? const Icon(Icons.check, color: Colors.blue) : null,
                         onTap: () {

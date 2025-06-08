@@ -101,13 +101,11 @@ class WorkoutLogicService {
       // Alternating Mode (handles AlternatingGroupItem and RestBlockItem)
       for (var item in _baseWorkout.items) {
         if (item is AlternatingGroupItem) {
+          int adjustedCycles = _calculateAdjustedCyclesForLevel(item.cycles);
           List<Exercise> exercisesInGroup = item.exercises;
-          List<Exercise> adjustedExercisesInGroup = _applyLevelModifierForAlternating(
-            exercisesInGroup,
-          );
 
-          for (int cycle = 0; cycle < item.cycles; cycle++) {
-            for (var exercise in adjustedExercisesInGroup) {
+          for (int cycle = 0; cycle < adjustedCycles; cycle++) {
+            for (var exercise in exercisesInGroup) {
               // Add work set
               sequence.add(WorkoutSet(
                 exercise: exercise,
@@ -127,7 +125,7 @@ class WorkoutLogicService {
               }
             }
             // Add group rest after each cycle, except the last one
-            if (item.groupRestInSeconds != null && item.groupRestInSeconds! > 0 && cycle < item.cycles - 1) {
+            if (item.groupRestInSeconds != null && item.groupRestInSeconds! > 0 && cycle < adjustedCycles - 1) {
               sequence.add(WorkoutSet(
                 exercise: Exercise(id: const Uuid().v4(), name: 'Group Rest', sets: 1, workTimeInSeconds: item.groupRestInSeconds!),
                 setNumber: cycle + 1,
@@ -233,34 +231,13 @@ class WorkoutLogicService {
     return adjustedExercises;
   }
 
-  /// Applies level modifiers to the workout exercises for alternating mode.
-  List<Exercise> _applyLevelModifierForAlternating(List<Exercise> originalExercises) {
-    List<Exercise> adjustedExercises = [];
+  /// Calculates the adjusted number of cycles for an alternating group based on the selected level.
+  int _calculateAdjustedCyclesForLevel(int originalCycles) {
     if (_selectedLevelOrMode is int && _selectedLevelOrMode >= 1 && _selectedLevelOrMode <= 10) {
       final int level = _selectedLevelOrMode;
-      double workTimeMultiplier = 1.0 + ((level - 1) * 0.1); // Example: +10% work time per level
-      double restTimeMultiplier = 1.0 - ((level - 1) * 0.05); // Example: -5% rest time per level
-
-      for (var exercise in originalExercises) {
-        int adjustedWorkTime = (exercise.workTimeInSeconds * workTimeMultiplier).round();
-        int? adjustedRestTime = exercise.restTimeInSeconds != null
-            ? (exercise.restTimeInSeconds! * restTimeMultiplier).round().clamp(0, double.infinity).toInt()
-            : null;
-
-        adjustedExercises.add(Exercise(
-          id: exercise.id,
-          name: exercise.name,
-          sets: exercise.sets, // Sets are still 1 for alternating exercises
-          reps: exercise.reps,
-          workTimeInSeconds: adjustedWorkTime.clamp(1, double.infinity).toInt(),
-          restTimeInSeconds: adjustedRestTime,
-          audioFileName: exercise.audioFileName,
-        ));
-      }
-    } else {
-      adjustedExercises = originalExercises;
+      return _calculateTotalSetsForLevelStatic(level, originalCycles);
     }
-    return adjustedExercises;
+    return originalCycles;
   }
 
   /// Helper to calculate total sets for a given level, ensuring strict increase.
