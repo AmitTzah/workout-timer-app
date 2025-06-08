@@ -5,6 +5,7 @@ import 'package:exercise_timer_app/screens/define_workout_screen.dart';
 import 'package:exercise_timer_app/screens/workout_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:exercise_timer_app/models/workout_item.dart'; // Import WorkoutItem
+import 'package:exercise_timer_app/models/rest_block_item.dart'; // Import RestBlockItem
 
 
 class WorkoutCard extends StatefulWidget {

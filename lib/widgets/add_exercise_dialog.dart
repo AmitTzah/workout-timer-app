@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart'; // Import Uuid
 import 'package:exercise_timer_app/models/exercise.dart';
-import 'package:exercise_timer_app/models/workout_item.dart';
 
 class AddExerciseDialog extends StatefulWidget {
   final List<String> predefinedExercises;
@@ -48,14 +48,13 @@ class _AddExerciseDialogState extends State<AddExerciseDialog> {
       final int? restTime = int.tryParse(_restTimeController.text.trim());
 
       if (name != null && name.isNotEmpty && sets != null && sets > 0 && workTime != null && workTime > 0) {
-        Navigator.of(context).pop(ExerciseItem(
-          exercise: Exercise(
-            name: name,
-            sets: sets,
-            reps: reps,
-            workTimeInSeconds: workTime,
-            restTimeInSeconds: restTime,
-          ),
+        Navigator.of(context).pop(Exercise( // Return Exercise directly
+          id: const Uuid().v4(), // Generate new ID
+          name: name,
+          sets: sets,
+          reps: reps,
+          workTimeInSeconds: workTime,
+          restTimeInSeconds: restTime,
         ));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

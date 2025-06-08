@@ -1,50 +1,44 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'exercise.dart';
+part of 'alternating_group_item.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class ExerciseAdapter extends TypeAdapter<Exercise> {
+class AlternatingGroupItemAdapter extends TypeAdapter<AlternatingGroupItem> {
   @override
-  final int typeId = 0;
+  final int typeId = 8;
 
   @override
-  Exercise read(BinaryReader reader) {
+  AlternatingGroupItem read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return Exercise(
+    return AlternatingGroupItem(
       id: fields[0] as String,
       name: fields[1] as String,
-      sets: fields[2] as int,
-      reps: fields[3] as int?,
-      audioFileName: fields[4] as String?,
-      workTimeInSeconds: fields[5] as int,
-      restTimeInSeconds: fields[6] as int?,
+      cycles: fields[2] as int,
+      groupRestInSeconds: fields[3] as int?,
+      exercises: (fields[4] as List).cast<Exercise>(),
     );
   }
 
   @override
-  void write(BinaryWriter writer, Exercise obj) {
+  void write(BinaryWriter writer, AlternatingGroupItem obj) {
     writer
-      ..writeByte(7)
-      ..writeByte(0)
-      ..write(obj.id)
+      ..writeByte(5)
       ..writeByte(1)
       ..write(obj.name)
       ..writeByte(2)
-      ..write(obj.sets)
+      ..write(obj.cycles)
       ..writeByte(3)
-      ..write(obj.reps)
+      ..write(obj.groupRestInSeconds)
       ..writeByte(4)
-      ..write(obj.audioFileName)
-      ..writeByte(5)
-      ..write(obj.workTimeInSeconds)
-      ..writeByte(6)
-      ..write(obj.restTimeInSeconds);
+      ..write(obj.exercises)
+      ..writeByte(0)
+      ..write(obj.id);
   }
 
   @override
@@ -53,7 +47,7 @@ class ExerciseAdapter extends TypeAdapter<Exercise> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ExerciseAdapter &&
+      other is AlternatingGroupItemAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

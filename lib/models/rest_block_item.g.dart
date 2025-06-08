@@ -1,33 +1,33 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'workout_item.dart';
+part of 'rest_block_item.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class ExerciseItemAdapter extends TypeAdapter<ExerciseItem> {
+class RestBlockItemAdapter extends TypeAdapter<RestBlockItem> {
   @override
-  final int typeId = 3;
+  final int typeId = 9;
 
   @override
-  ExerciseItem read(BinaryReader reader) {
+  RestBlockItem read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return ExerciseItem(
-      exercise: fields[1] as Exercise,
+    return RestBlockItem(
       id: fields[0] as String,
+      durationInSeconds: fields[1] as int,
     );
   }
 
   @override
-  void write(BinaryWriter writer, ExerciseItem obj) {
+  void write(BinaryWriter writer, RestBlockItem obj) {
     writer
       ..writeByte(2)
       ..writeByte(1)
-      ..write(obj.exercise)
+      ..write(obj.durationInSeconds)
       ..writeByte(0)
       ..write(obj.id);
   }
@@ -38,7 +38,7 @@ class ExerciseItemAdapter extends TypeAdapter<ExerciseItem> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ExerciseItemAdapter &&
+      other is RestBlockItemAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-import 'package:provider/provider.dart'; // Import provider
+import 'package:provider/provider.dart';
 import 'package:exercise_timer_app/models/exercise.dart';
 import 'package:exercise_timer_app/models/user_workout.dart';
-import 'package:exercise_timer_app/repositories/user_workout_repository.dart'; // Use the new repository
+import 'package:exercise_timer_app/repositories/user_workout_repository.dart';
 import 'package:exercise_timer_app/widgets/workout_name_text_field.dart';
 import 'package:exercise_timer_app/widgets/exercise_list.dart';
 import 'package:exercise_timer_app/widgets/workout_duration_display.dart';
 import 'package:exercise_timer_app/widgets/save_workout_button.dart';
-import 'package:exercise_timer_app/models/workout_item.dart'; // Import WorkoutItem
-import 'package:exercise_timer_app/models/workout_type.dart'; // Import WorkoutType
-import 'package:exercise_timer_app/widgets/add_exercise_dialog.dart'; // Import the new dialog
+import 'package:exercise_timer_app/models/workout_item.dart';
+import 'package:exercise_timer_app/models/workout_type.dart';
+import 'package:exercise_timer_app/widgets/add_exercise_dialog.dart';
+import 'package:exercise_timer_app/models/alternating_group_item.dart'; // Import new item
+import 'package:exercise_timer_app/widgets/alternating_group_list.dart'; // Import new widget
+import 'package:exercise_timer_app/models/rest_block_item.dart'; // Import RestBlockItem
 
 class DefineWorkoutScreen extends StatefulWidget {
-  final UserWorkout? workout; // Optional: for editing existing workouts
+  final UserWorkout? workout;
 
   const DefineWorkoutScreen({super.key, this.workout});
 
@@ -22,16 +25,14 @@ class DefineWorkoutScreen extends StatefulWidget {
 }
 
 class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
-  late UserWorkoutRepository _userWorkoutRepository; // Declare repository
+  late UserWorkoutRepository _userWorkoutRepository;
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _workoutNameController = TextEditingController();
-  // Removed: final FocusNode _workoutNameFocusNode = FocusNode();
-  
-  List<WorkoutItem> _workoutItems = []; // Changed to WorkoutItem
-  String _workoutId = const Uuid().v4(); // Generate new ID for new workouts
-  WorkoutType _workoutType = WorkoutType.sequential; // New: Default workout type
 
-  // Predefined list of exercises
+  List<WorkoutItem> _workoutItems = [];
+  String _workoutId = const Uuid().v4();
+  WorkoutType _workoutType = WorkoutType.sequential;
+
   final List<String> _predefinedExercises = [
     'Pull-ups',
     'Dips',
@@ -51,46 +52,65 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
   void initState() {
     super.initState();
     if (widget.workout != null) {
-      // Editing existing workout
       _workoutId = widget.workout!.id;
       _workoutNameController.text = widget.workout!.name;
-      _workoutItems = List.from(widget.workout!.items); // Populate with WorkoutItems
-      _workoutType = widget.workout!.workoutType; // Initialize workout type from existing workout
-
+      _workoutItems = List.from(widget.workout!.items);
+      _workoutType = widget.workout!.workoutType;
     }
-    // Removed: WidgetsBinding.instance.addPostFrameCallback((_) { _workoutNameFocusNode.requestFocus(); });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _userWorkoutRepository = Provider.of<UserWorkoutRepository>(context); // Get repository
+    _userWorkoutRepository = Provider.of<UserWorkoutRepository>(context);
   }
 
   @override
   void dispose() {
     _workoutNameController.dispose();
-    // Removed: _workoutNameFocusNode.dispose();
     super.dispose();
   }
 
   void _addExercise() async {
-    final ExerciseItem? newExerciseItem = await showDialog<ExerciseItem>(
+    final Exercise? newExercise = await showDialog<Exercise>(
       context: context,
       builder: (BuildContext context) {
         return AddExerciseDialog(predefinedExercises: _predefinedExercises);
       },
     );
 
-    if (newExerciseItem != null) {
+    if (newExercise != null) {
       setState(() {
-        _workoutItems.add(newExerciseItem);
+        if (_workoutType == WorkoutType.sequential) {
+          _workoutItems.add(ExerciseItem(id: const Uuid().v4(), exercise: newExercise));
+        } else {
+          AlternatingGroupItem? lastGroup;
+          if (_workoutItems.isNotEmpty &&
+              _workoutItems.last is AlternatingGroupItem) {
+            lastGroup = _workoutItems.last as AlternatingGroupItem;
+          }
+
+          if (lastGroup != null) {
+            lastGroup.exercises.add(newExercise);
+          } else {
+            _workoutItems.add(
+              AlternatingGroupItem(
+                id: const Uuid().v4(),
+                name:
+                    'Alternating Group ${_workoutItems.whereType<AlternatingGroupItem>().length + 1}',
+                cycles: 1, // Default to 1 cycle
+                exercises: [newExercise],
+              ),
+            );
+          }
+        }
       });
     }
   }
 
   void _addRestBlock() {
-    final TextEditingController restBlockDurationController = TextEditingController(text: '30'); // Default rest block duration
+    final TextEditingController restBlockDurationController =
+        TextEditingController(text: '30');
 
     showDialog(
       context: context,
@@ -100,7 +120,9 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
           content: TextField(
             controller: restBlockDurationController,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'Rest Duration (seconds)'),
+            decoration: const InputDecoration(
+              labelText: 'Rest Duration (seconds)',
+            ),
           ),
           actions: <Widget>[
             TextButton(
@@ -112,10 +134,14 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
             ElevatedButton(
               child: const Text('Add'),
               onPressed: () {
-                final int? duration = int.tryParse(restBlockDurationController.text.trim());
+                final int? duration = int.tryParse(
+                  restBlockDurationController.text.trim(),
+                );
                 if (duration != null && duration > 0) {
                   setState(() {
-                    _workoutItems.add(RestBlockItem(durationInSeconds: duration));
+                    _workoutItems.add(
+                      RestBlockItem(id: const Uuid().v4(), durationInSeconds: duration),
+                    );
                   });
                   Navigator.of(context).pop();
                 } else {
@@ -133,6 +159,20 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
     );
   }
 
+  void _addAlternatingGroup() {
+    setState(() {
+      _workoutItems.add(
+        AlternatingGroupItem(
+          id: const Uuid().v4(),
+          name:
+              'Alternating Group ${_workoutItems.whereType<AlternatingGroupItem>().length + 1}',
+          cycles: 1, // Default to 1 cycle
+          exercises: [],
+        ),
+      );
+    });
+  }
+
   void _removeWorkoutItem(int index) {
     setState(() {
       _workoutItems.removeAt(index);
@@ -144,14 +184,18 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
 
     if (itemToEdit is ExerciseItem) {
       final Exercise exerciseToEdit = itemToEdit.exercise;
-      final TextEditingController setsController =
-          TextEditingController(text: exerciseToEdit.sets.toString());
-      final TextEditingController repsController =
-          TextEditingController(text: exerciseToEdit.reps?.toString() ?? '');
-      final TextEditingController workTimeController =
-          TextEditingController(text: exerciseToEdit.workTimeInSeconds.toString());
-      final TextEditingController restTimeController =
-          TextEditingController(text: exerciseToEdit.restTimeInSeconds?.toString() ?? '');
+      final TextEditingController setsController = TextEditingController(
+        text: exerciseToEdit.sets.toString(),
+      );
+      final TextEditingController repsController = TextEditingController(
+        text: exerciseToEdit.reps?.toString() ?? '',
+      );
+      final TextEditingController workTimeController = TextEditingController(
+        text: exerciseToEdit.workTimeInSeconds.toString(),
+      );
+      final TextEditingController restTimeController = TextEditingController(
+        text: exerciseToEdit.restTimeInSeconds?.toString() ?? '',
+      );
 
       showDialog(
         context: context,
@@ -169,17 +213,23 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
                 TextField(
                   controller: repsController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'Reps (Optional)'),
+                  decoration: const InputDecoration(
+                    labelText: 'Reps (Optional)',
+                  ),
                 ),
                 TextField(
                   controller: workTimeController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'Work Time (seconds)'),
+                  decoration: const InputDecoration(
+                    labelText: 'Work Time (seconds)',
+                  ),
                 ),
                 TextField(
                   controller: restTimeController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'Rest Time (seconds, Optional)'),
+                  decoration: const InputDecoration(
+                    labelText: 'Rest Time (seconds, Optional)',
+                  ),
                 ),
               ],
             ),
@@ -195,13 +245,22 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
                 onPressed: () {
                   final int? newSets = int.tryParse(setsController.text.trim());
                   final int? newReps = int.tryParse(repsController.text.trim());
-                  final int? newWorkTime = int.tryParse(workTimeController.text.trim());
-                  final int? newRestTime = int.tryParse(restTimeController.text.trim());
+                  final int? newWorkTime = int.tryParse(
+                    workTimeController.text.trim(),
+                  );
+                  final int? newRestTime = int.tryParse(
+                    restTimeController.text.trim(),
+                  );
 
-                  if (newSets != null && newSets > 0 && newWorkTime != null && newWorkTime > 0) {
+                  if (newSets != null &&
+                      newSets > 0 &&
+                      newWorkTime != null &&
+                      newWorkTime > 0) {
                     setState(() {
                       _workoutItems[index] = ExerciseItem(
+                        id: exerciseToEdit.id, // Pass existing ID
                         exercise: Exercise(
+                          id: exerciseToEdit.id, // Pass existing ID
                           name: exerciseToEdit.name,
                           sets: newSets,
                           reps: newReps,
@@ -237,7 +296,9 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
             content: TextField(
               controller: restBlockDurationController,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Rest Duration (seconds)'),
+              decoration: const InputDecoration(
+                labelText: 'Rest Duration (seconds)',
+              ),
             ),
             actions: <Widget>[
               TextButton(
@@ -247,12 +308,17 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
                 },
               ),
               ElevatedButton(
-                child: const Text('Add'),
+                child: const Text('Save'),
                 onPressed: () {
-                  final int? newDuration = int.tryParse(restBlockDurationController.text.trim());
+                  final int? newDuration = int.tryParse(
+                    restBlockDurationController.text.trim(),
+                  );
                   if (newDuration != null && newDuration > 0) {
                     setState(() {
-                      _workoutItems[index] = RestBlockItem(durationInSeconds: newDuration);
+                      _workoutItems[index] = RestBlockItem(
+                        id: itemToEdit.id, // Keep existing ID
+                        durationInSeconds: newDuration,
+                      );
                     });
                     Navigator.of(context).pop();
                   } else {
@@ -268,7 +334,136 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
           );
         },
       );
+    } else if (itemToEdit is AlternatingGroupItem) {
+      // No direct edit for AlternatingGroupItem itself, its content is edited via AlternatingGroupList
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Edit exercises within the alternating group directly.',
+          ),
+        ),
+      );
     }
+  }
+
+  // Helper to get the actual index of an AlternatingGroupItem in _workoutItems
+  int _getActualGroupIndex(String groupId) {
+    return _workoutItems.indexWhere((item) => item is AlternatingGroupItem && item.id == groupId);
+  }
+
+  void _onReorderItems(int oldIndex, int newIndex) {
+    setState(() {
+      if (newIndex > oldIndex) {
+        newIndex -= 1;
+      }
+      final WorkoutItem item = _workoutItems.removeAt(oldIndex);
+      _workoutItems.insert(newIndex, item);
+    });
+  }
+
+  void _onReorderExercisesInGroup(
+    String groupId,
+    int oldExerciseIndex,
+    int newExerciseIndex,
+  ) {
+    setState(() {
+      final int actualGroupIndex = _getActualGroupIndex(groupId);
+      if (actualGroupIndex == -1 || actualGroupIndex >= _workoutItems.length) {
+        return; // Invalid group index
+      }
+
+      final WorkoutItem currentItem = _workoutItems[actualGroupIndex];
+      if (currentItem is! AlternatingGroupItem) {
+        return; // Not an alternating group, should not happen based on UI logic
+      }
+
+      final AlternatingGroupItem group = currentItem;
+
+      // If there's only one exercise in the group, reordering it doesn't make sense
+      // and can lead to crashes with ReorderableListView.
+      // We prevent the operation if the list has only one element.
+      if (group.exercises.length <= 1) {
+        return;
+      }
+
+      if (newExerciseIndex > oldExerciseIndex) {
+        newExerciseIndex -= 1;
+      }
+
+      // Ensure indices are within bounds before attempting to remove/insert
+      if (oldExerciseIndex < 0 ||
+          oldExerciseIndex >= group.exercises.length ||
+          newExerciseIndex < 0 ||
+          newExerciseIndex > group.exercises.length) {
+        return; // Invalid exercise index
+      }
+
+      final Exercise exercise = group.exercises.removeAt(oldExerciseIndex);
+      group.exercises.insert(newExerciseIndex, exercise);
+    });
+  }
+
+  void _onAddExerciseToGroup(String groupId, Exercise newExercise) {
+    setState(() {
+      final int actualGroupIndex = _getActualGroupIndex(groupId);
+      if (actualGroupIndex != -1) {
+        final AlternatingGroupItem group =
+            _workoutItems[actualGroupIndex] as AlternatingGroupItem;
+        group.exercises.add(newExercise);
+      }
+    });
+  }
+
+  void _onRemoveExerciseFromGroup(
+    String groupId,
+    int exerciseIndex,
+  ) {
+    setState(() {
+      final int actualGroupIndex = _getActualGroupIndex(groupId);
+      if (actualGroupIndex != -1) {
+        final AlternatingGroupItem group =
+            _workoutItems[actualGroupIndex] as AlternatingGroupItem;
+        group.exercises.removeAt(exerciseIndex);
+        if (group.exercises.isEmpty) {
+          _workoutItems.removeAt(
+            actualGroupIndex,
+          ); // Remove group if it becomes empty
+        }
+      }
+    });
+  }
+
+  void _onEditExerciseInGroup(
+    String groupId,
+    int exerciseIndex,
+    Exercise updatedExercise,
+  ) {
+    setState(() {
+      final int actualGroupIndex = _getActualGroupIndex(groupId);
+      if (actualGroupIndex != -1) {
+        final AlternatingGroupItem group =
+            _workoutItems[actualGroupIndex] as AlternatingGroupItem;
+        group.exercises[exerciseIndex] = updatedExercise;
+      }
+    });
+  }
+
+  void _onRemoveItem(String id) {
+    setState(() {
+      _workoutItems.removeWhere((item) => item.id == id);
+    });
+  }
+
+  void _onEditGroup(String id, String newName, int newCycles, int? newGroupRest) {
+    setState(() {
+      final int index = _workoutItems.indexWhere((item) => item.id == id);
+      if (index != -1 && _workoutItems[index] is AlternatingGroupItem) {
+        final group = _workoutItems[index] as AlternatingGroupItem;
+        group.name = newName;
+        group.cycles = newCycles;
+        group.groupRestInSeconds = newGroupRest;
+      }
+    });
   }
 
   int _calculateTotalDuration() {
@@ -277,10 +472,25 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
       if (item is ExerciseItem) {
         totalDuration += item.exercise.sets * item.exercise.workTimeInSeconds;
         if (item.exercise.restTimeInSeconds != null) {
-          totalDuration += item.exercise.sets * item.exercise.restTimeInSeconds!;
+          totalDuration +=
+              item.exercise.sets * item.exercise.restTimeInSeconds!;
         }
       } else if (item is RestBlockItem) {
         totalDuration += item.durationInSeconds;
+      } else if (item is AlternatingGroupItem) {
+        // For alternating groups, calculate duration based on cycles and exercise times
+        int groupExercisesDuration = 0;
+        for (var exercise in item.exercises) {
+          groupExercisesDuration += exercise.workTimeInSeconds;
+          if (exercise.restTimeInSeconds != null) {
+            groupExercisesDuration += exercise.restTimeInSeconds!;
+          }
+        }
+        totalDuration += groupExercisesDuration * item.cycles;
+        // Add group rest for each cycle except the last one
+        if (item.groupRestInSeconds != null && item.cycles > 1) {
+          totalDuration += item.groupRestInSeconds! * (item.cycles - 1);
+        }
       }
     }
     return totalDuration;
@@ -313,7 +523,25 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
     if (_formKey.currentState!.validate()) {
       if (_workoutItems.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please add at least one exercise or rest block.')),
+          const SnackBar(
+            content: Text('Please add at least one exercise or rest block.'),
+          ),
+        );
+        return;
+      }
+
+      // Remove empty alternating groups before saving
+      _workoutItems.removeWhere(
+        (item) => item is AlternatingGroupItem && item.exercises.isEmpty,
+      );
+
+      if (_workoutItems.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Workout cannot be empty after removing empty groups.',
+            ),
+          ),
         );
         return;
       }
@@ -324,9 +552,9 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
       final UserWorkout newWorkout = UserWorkout(
         id: _workoutId,
         name: workoutName,
-        items: _workoutItems, // Use new items list
+        items: _workoutItems,
         totalWorkoutTime: totalDuration,
-        workoutType: _workoutType, // Save the selected workout type
+        workoutType: _workoutType,
       );
 
       await _userWorkoutRepository.saveUserWorkout(newWorkout);
@@ -350,12 +578,8 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              WorkoutNameTextField(
-                controller: _workoutNameController,
-                // Removed: focusNode: _workoutNameFocusNode,
-              ),
+              WorkoutNameTextField(controller: _workoutNameController),
               const SizedBox(height: 20),
-              // New: Workout Type Selector
               SegmentedButton<WorkoutType>(
                 segments: const <ButtonSegment<WorkoutType>>[
                   ButtonSegment<WorkoutType>(
@@ -371,41 +595,64 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
                 onSelectionChanged: (Set<WorkoutType> newSelection) {
                   setState(() {
                     _workoutType = newSelection.first;
+                    // Clear workout items if switching type to avoid invalid combinations
+                    _workoutItems.clear();
                   });
                 },
               ),
               const SizedBox(height: 20),
-              // Buttons to add exercises/rest blocks
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: _addExercise,
-                    icon: const Icon(Icons.add),
-                    label: const Text('Add Exercise'),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: _addRestBlock,
-                    icon: const Icon(Icons.add),
-                    label: const Text('Add Rest Block'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              ExerciseList(
-                workoutItems: _workoutItems, // Pass workoutItems
-                onEditWorkoutItem: _editWorkoutItem, // Use new edit method
-                onRemoveWorkoutItem: _removeWorkoutItem, // Use new remove method
-                onReorderWorkoutItems: (oldIndex, newIndex) {
-                  setState(() {
-                    if (newIndex > oldIndex) {
-                      newIndex -= 1;
-                    }
-                    final WorkoutItem item = _workoutItems.removeAt(oldIndex);
-                    _workoutItems.insert(newIndex, item);
-                  });
-                },
-              ),
+              if (_workoutType == WorkoutType.sequential) ...[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: _addExercise,
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add Exercise'),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: _addRestBlock,
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add Rest Block'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                ExerciseList(
+                  workoutItems: _workoutItems,
+                  onEditWorkoutItem: _editWorkoutItem,
+                  onRemoveWorkoutItem: _removeWorkoutItem,
+                  onReorderWorkoutItems: (oldIndex, newIndex) {
+                    setState(() {
+                      if (newIndex > oldIndex) {
+                        newIndex -= 1;
+                      }
+                      final WorkoutItem item = _workoutItems.removeAt(oldIndex);
+                      _workoutItems.insert(newIndex, item);
+                    });
+                  },
+                ),
+              ] else if (_workoutType == WorkoutType.alternating) ...[
+                AlternatingGroupList(
+                  workoutItems: _workoutItems,
+                  onReorderItems: _onReorderItems,
+                  onReorderExercisesInGroup: _onReorderExercisesInGroup,
+                  onAddExerciseToGroup: _onAddExerciseToGroup,
+                  onRemoveExerciseFromGroup: _onRemoveExerciseFromGroup,
+                  onEditExerciseInGroup: _onEditExerciseInGroup,
+                  onRemoveItem: _onRemoveItem, // Use onRemoveItem
+                  onAddGroup: _addAlternatingGroup,
+                  predefinedExercises: _predefinedExercises,
+                  onEditGroup: _onEditGroup, // Use onEditGroup
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton.icon(
+                  onPressed:
+                      _addRestBlock, // Rest blocks can still be added between groups
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add Rest Block (between groups)'),
+                ),
+              ],
               const SizedBox(height: 20),
               WorkoutDurationDisplay(
                 totalDurationInSeconds: _calculateTotalDuration(),

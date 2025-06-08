@@ -6,6 +6,8 @@ import 'package:exercise_timer_app/models/user_workout.dart';
 import 'package:exercise_timer_app/models/workout_set.dart';
 import 'package:exercise_timer_app/models/workout_item.dart'; // Import WorkoutItem and its concrete types
 import 'package:exercise_timer_app/models/workout_type.dart'; // Import WorkoutType
+import 'package:exercise_timer_app/models/alternating_group_item.dart'; // Import AlternatingGroupItem
+import 'package:exercise_timer_app/models/rest_block_item.dart'; // Import RestBlockItem
 
 class DatabaseService {
   static bool _isInitialized = false;
@@ -21,10 +23,11 @@ class DatabaseService {
     if (!Hive.isAdapterRegistered(1)) Hive.registerAdapter(WorkoutSummaryAdapter());
     if (!Hive.isAdapterRegistered(2)) Hive.registerAdapter(UserWorkoutAdapter());
     if (!Hive.isAdapterRegistered(3)) Hive.registerAdapter(ExerciseItemAdapter()); // ExerciseItem typeId
-    if (!Hive.isAdapterRegistered(4)) Hive.registerAdapter(RestBlockItemAdapter()); // RestBlockItem typeId
+    if (!Hive.isAdapterRegistered(9)) Hive.registerAdapter(RestBlockItemAdapter()); // RestBlockItem typeId
     if (!Hive.isAdapterRegistered(5)) Hive.registerAdapter(GoalAdapter()); // Goal typeId
     if (!Hive.isAdapterRegistered(6)) Hive.registerAdapter(WorkoutSetAdapter()); // WorkoutSet typeId
     if (!Hive.isAdapterRegistered(7)) Hive.registerAdapter(WorkoutTypeAdapter()); // WorkoutType typeId
+    if (!Hive.isAdapterRegistered(8)) Hive.registerAdapter(AlternatingGroupItemAdapter()); // AlternatingGroupItem typeId
 
     _isInitialized = true;
   }

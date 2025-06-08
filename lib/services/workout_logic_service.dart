@@ -1,7 +1,10 @@
 import 'package:exercise_timer_app/models/user_workout.dart';
 import 'package:exercise_timer_app/models/exercise.dart'; // Still needed for Exercise object within WorkoutSet
 import 'package:exercise_timer_app/models/workout_set.dart';
+import 'package:uuid/uuid.dart'; // Import Uuid
 import 'package:exercise_timer_app/models/workout_item.dart'; // New: Import WorkoutItem
+import 'package:exercise_timer_app/models/alternating_group_item.dart'; // Import AlternatingGroupItem
+import 'package:exercise_timer_app/models/rest_block_item.dart'; // Import RestBlockItem
 
 /// Manages the core logic of workout structure and progression.
 /// This service is independent of UI or specific timer implementations.
@@ -60,96 +63,84 @@ class WorkoutLogicService {
   /// Initializes the workout sequence based on level/mode and alternation.
   void _initializeWorkoutSequence() {
     List<WorkoutSet> sequence = [];
-    List<ExerciseItem> originalExerciseItems = [];
 
-    // Extract all ExerciseItems from the base workout for level modification
-    for (var item in _baseWorkout.items) {
-      if (item is ExerciseItem) {
-        originalExerciseItems.add(item);
-      }
-    }
-
-    List<Exercise> adjustedExercises = _applyLevelModifier(originalExerciseItems);
-
-    if (_workoutType == WorkoutType.alternating) {
-      // Create a map for quick lookup of adjusted exercises by their original name
-      Map<String, Exercise> adjustedExerciseMap = {
-        for (var ae in adjustedExercises) ae.name: ae
-      };
-
-      // Track the current set number for each exercise
-      Map<String, int> currentSetNumbers = {
-        for (var ae in adjustedExercises) ae.name: 1
-      };
-
-      bool moreSetsExist = true;
-      while (moreSetsExist) {
-        moreSetsExist = false; // Assume no more sets until we find one
-
-        for (var item in _baseWorkout.items) {
-          if (item is ExerciseItem) {
-            final originalExerciseName = item.exercise.name;
-            final adjustedExercise = adjustedExerciseMap[originalExerciseName];
-
-            if (adjustedExercise != null) {
-              int currentSet = currentSetNumbers[originalExerciseName]!;
-              if (currentSet <= adjustedExercise.sets) {
-                // Add the work set
-                sequence.add(WorkoutSet(
-                  exercise: adjustedExercise,
-                  setNumber: currentSet,
-                  isRestSet: false,
-                  isRestBlock: false,
-                ));
-                // In alternating mode, per-set rests are not added here.
-                // Rest blocks are handled separately.
-                currentSetNumbers[originalExerciseName] = currentSet + 1; // Increment set number for this exercise
-                moreSetsExist = true; // More sets were added in this round
-              }
-            }
-          } else if (item is RestBlockItem) {
-            // Insert rest blocks directly at their position in the original sequence
-            // This ensures they are not duplicated per alternating "round"
-            sequence.add(WorkoutSet(
-              exercise: Exercise(name: 'Rest Block', sets: 1, workTimeInSeconds: item.durationInSeconds), // Dummy exercise
-              setNumber: 1, // Rest blocks don't have sets in the same way
-              isRestSet: true,
-              isRestBlock: true,
-              restBlockDuration: item.durationInSeconds,
-            ));
-          }
-        }
-      }
-    } else {
-      // Sequential Mode (existing logic, slightly adapted for WorkoutItem)
-      int adjustedExerciseIndex = 0;
+    if (_workoutType == WorkoutType.sequential) {
+      // Sequential Mode
       for (var item in _baseWorkout.items) {
         if (item is ExerciseItem) {
-          if (adjustedExerciseIndex < adjustedExercises.length) {
-            final adjustedExercise = adjustedExercises[adjustedExerciseIndex];
-            for (int s = 1; s <= adjustedExercise.sets; s++) {
+          final adjustedExercise = _applyLevelModifier([item]).first; // Apply level modifier to single exercise
+          for (int s = 1; s <= adjustedExercise.sets; s++) {
+            sequence.add(WorkoutSet(
+              exercise: adjustedExercise,
+              setNumber: s,
+              isRestSet: false,
+              isRestBlock: false,
+            ));
+            // Add per-set rest if defined and not the last set
+            if (adjustedExercise.restTimeInSeconds != null && adjustedExercise.restTimeInSeconds! > 0 && s < adjustedExercise.sets) {
               sequence.add(WorkoutSet(
                 exercise: adjustedExercise,
                 setNumber: s,
-                isRestSet: false,
+                isRestSet: true,
                 isRestBlock: false,
+                restBlockDuration: adjustedExercise.restTimeInSeconds,
               ));
-              // Add per-set rest if defined and not the last set
-              if (adjustedExercise.restTimeInSeconds != null && adjustedExercise.restTimeInSeconds! > 0 && s < adjustedExercise.sets) {
-                sequence.add(WorkoutSet(
-                  exercise: adjustedExercise,
-                  setNumber: s,
-                  isRestSet: true,
-                  isRestBlock: false,
-                  restBlockDuration: adjustedExercise.restTimeInSeconds,
-                ));
-              }
             }
-            adjustedExerciseIndex++;
           }
         } else if (item is RestBlockItem) {
           sequence.add(WorkoutSet(
-            exercise: Exercise(name: 'Rest Block', sets: 1, workTimeInSeconds: item.durationInSeconds),
+            exercise: Exercise(id: item.id, name: 'Rest Block', sets: 1, workTimeInSeconds: item.durationInSeconds),
+            setNumber: 1,
+            isRestSet: true,
+            isRestBlock: true,
+            restBlockDuration: item.durationInSeconds,
+          ));
+        }
+      }
+    } else {
+      // Alternating Mode (handles AlternatingGroupItem and RestBlockItem)
+      for (var item in _baseWorkout.items) {
+        if (item is AlternatingGroupItem) {
+          List<Exercise> exercisesInGroup = item.exercises;
+          List<Exercise> adjustedExercisesInGroup = _applyLevelModifierForAlternating(
+            exercisesInGroup,
+          );
+
+          for (int cycle = 0; cycle < item.cycles; cycle++) {
+            for (var exercise in adjustedExercisesInGroup) {
+              // Add work set
+              sequence.add(WorkoutSet(
+                exercise: exercise,
+                setNumber: cycle + 1, // Cycle number as set number
+                isRestSet: false,
+                isRestBlock: false,
+              ));
+              // Add per-exercise rest if defined
+              if (exercise.restTimeInSeconds != null && exercise.restTimeInSeconds! > 0) {
+                sequence.add(WorkoutSet(
+                  exercise: exercise,
+                  setNumber: cycle + 1,
+                  isRestSet: true,
+                  isRestBlock: false,
+                  restBlockDuration: exercise.restTimeInSeconds,
+                ));
+              }
+            }
+            // Add group rest after each cycle, except the last one
+            if (item.groupRestInSeconds != null && item.groupRestInSeconds! > 0 && cycle < item.cycles - 1) {
+              sequence.add(WorkoutSet(
+                exercise: Exercise(id: const Uuid().v4(), name: 'Group Rest', sets: 1, workTimeInSeconds: item.groupRestInSeconds!),
+                setNumber: cycle + 1,
+                isRestSet: true,
+                isRestBlock: true,
+                restBlockDuration: item.groupRestInSeconds,
+              ));
+            }
+          }
+        } else if (item is RestBlockItem) {
+          // Rest blocks are added directly at their position in the main sequence
+          sequence.add(WorkoutSet(
+            exercise: Exercise(id: item.id, name: 'Rest Block', sets: 1, workTimeInSeconds: item.durationInSeconds),
             setNumber: 1,
             isRestSet: true,
             isRestBlock: true,
@@ -180,7 +171,7 @@ class WorkoutLogicService {
     return workoutContinues;
   }
 
-  /// Applies level modifiers to the workout exercises.
+  /// Applies level modifiers to the workout exercises for sequential mode.
   List<Exercise> _applyLevelModifier(List<ExerciseItem> originalExerciseItems) {
     List<Exercise> adjustedExercises = [];
     if (_selectedLevelOrMode is int && _selectedLevelOrMode >= 1 && _selectedLevelOrMode <= 10) {
@@ -204,6 +195,7 @@ class WorkoutLogicService {
           adjustedSets = 1;
         }
         tempAdjustedExercises.add(Exercise(
+          id: exercise.id, // Pass existing ID
           name: exercise.name,
           sets: adjustedSets,
           reps: exercise.reps,
@@ -225,6 +217,7 @@ class WorkoutLogicService {
 
         Exercise exerciseToAdjust = tempAdjustedExercises[largestSetIndex];
         tempAdjustedExercises[largestSetIndex] = Exercise(
+          id: exerciseToAdjust.id, // Pass existing ID
           name: exerciseToAdjust.name,
           sets: (exerciseToAdjust.sets + difference).clamp(1, double.infinity).toInt(),
           reps: exerciseToAdjust.reps,
@@ -236,6 +229,36 @@ class WorkoutLogicService {
       adjustedExercises = tempAdjustedExercises;
     } else {
       adjustedExercises = originalExerciseItems.map((e) => e.exercise).toList();
+    }
+    return adjustedExercises;
+  }
+
+  /// Applies level modifiers to the workout exercises for alternating mode.
+  List<Exercise> _applyLevelModifierForAlternating(List<Exercise> originalExercises) {
+    List<Exercise> adjustedExercises = [];
+    if (_selectedLevelOrMode is int && _selectedLevelOrMode >= 1 && _selectedLevelOrMode <= 10) {
+      final int level = _selectedLevelOrMode;
+      double workTimeMultiplier = 1.0 + ((level - 1) * 0.1); // Example: +10% work time per level
+      double restTimeMultiplier = 1.0 - ((level - 1) * 0.05); // Example: -5% rest time per level
+
+      for (var exercise in originalExercises) {
+        int adjustedWorkTime = (exercise.workTimeInSeconds * workTimeMultiplier).round();
+        int? adjustedRestTime = exercise.restTimeInSeconds != null
+            ? (exercise.restTimeInSeconds! * restTimeMultiplier).round().clamp(0, double.infinity).toInt()
+            : null;
+
+        adjustedExercises.add(Exercise(
+          id: exercise.id,
+          name: exercise.name,
+          sets: exercise.sets, // Sets are still 1 for alternating exercises
+          reps: exercise.reps,
+          workTimeInSeconds: adjustedWorkTime.clamp(1, double.infinity).toInt(),
+          restTimeInSeconds: adjustedRestTime,
+          audioFileName: exercise.audioFileName,
+        ));
+      }
+    } else {
+      adjustedExercises = originalExercises;
     }
     return adjustedExercises;
   }

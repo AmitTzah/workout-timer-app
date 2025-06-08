@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:exercise_timer_app/models/workout_item.dart'; // Import WorkoutItem
+import 'package:exercise_timer_app/models/rest_block_item.dart'; // Import RestBlockItem
+// Import Exercise
 
 class ExerciseList extends StatelessWidget {
   final List<WorkoutItem> workoutItems; // Changed to WorkoutItem list
@@ -26,7 +28,7 @@ class ExerciseList extends StatelessWidget {
         if (item is ExerciseItem) {
           final exercise = item.exercise;
           return Card(
-            key: ValueKey(exercise.name + index.toString()),
+            key: ValueKey(exercise.id), // Use exercise ID for key
             margin: const EdgeInsets.symmetric(vertical: 4.0),
             child: ListTile(
               title: Text(exercise.name),
@@ -53,7 +55,7 @@ class ExerciseList extends StatelessWidget {
           );
         } else if (item is RestBlockItem) {
           return Card(
-            key: ValueKey('rest_block_${item.durationInSeconds}_$index'),
+            key: ValueKey(item.id), // Use rest block ID for key
             color: Colors.grey[200],
             margin: const EdgeInsets.symmetric(vertical: 4.0),
             child: ListTile(
