@@ -52,7 +52,8 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
               final group = item;
               return Card(
                 key: ValueKey(group.id),
-                margin: const EdgeInsets.symmetric(vertical: 8.0),
+                margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0), // Add horizontal margin
+                elevation: 4.0, // Add elevation for a raised effect
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
@@ -86,9 +87,36 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
                         ],
                       ),
                       const Divider(),
+                      // Layout for Cycles and Rest between cycles, with main edit icon for group
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Text('Cycles: ${group.cycles} | Rest between cycles: ${group.groupRestInSeconds ?? 0}s'),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  const Text(
+                                    'Cycles',
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  Text('${group.cycles}'),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  const Text(
+                                    'Rest Between Cycles',
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  Text('${group.groupRestInSeconds ?? 0}s'),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       ReorderableListView.builder(
                         shrinkWrap: true,
@@ -99,34 +127,40 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
                         },
                         itemBuilder: (context, exerciseIndex) {
                           final exercise = group.exercises[exerciseIndex];
-                          return ListTile(
-                            key: ValueKey(exercise.id),
-                            title: Text(exercise.name),
-                            subtitle: Text('Work: ${exercise.workTimeInSeconds}s | Rest: ${exercise.restTimeInSeconds ?? 'N/A'}s'),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.edit),
-                                  onPressed: () async {
-                                    final Exercise? updatedExercise = await _showEditExerciseDialog(context, exercise);
-                                    if (updatedExercise != null) {
-                                      widget.onEditExerciseInGroup(group.id, exerciseIndex, updatedExercise);
-                                    }
-                                  },
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () => widget.onRemoveExerciseFromGroup(group.id, exerciseIndex),
-                                ),
-                              ],
+                          return Card( // Wrap ListTile in Card for raised effect
+                            key: ValueKey(exercise.id), // Key needs to be on the Card for ReorderableListView
+                            margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0), // Add horizontal margin
+                            elevation: 2.0, // Add elevation for a raised effect
+                            child: ListTile(
+                              leading: const Icon(Icons.drag_handle), // Drag handle
+                              title: Text(exercise.name),
+                              subtitle: Text('Work: ${exercise.workTimeInSeconds}s | Rest: ${exercise.restTimeInSeconds ?? 'N/A'}s'),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.edit),
+                                    onPressed: () async {
+                                      final Exercise? updatedExercise = await _showEditExerciseDialog(context, exercise);
+                                      if (updatedExercise != null) {
+                                        widget.onEditExerciseInGroup(group.id, exerciseIndex, updatedExercise);
+                                      }
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete),
+                                    onPressed: () => widget.onRemoveExerciseFromGroup(group.id, exerciseIndex),
+                                  ),
+                                ],
+                              ),
                             ),
                           );
                         },
                       ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton.icon(
+                      // Repositioned and styled "Add Exercise to Group" button
+                      const SizedBox(height: 10),
+                      Center(
+                        child: OutlinedButton.icon(
                           icon: const Icon(Icons.add),
                           label: const Text('Add Exercise to Group'),
                           onPressed: () async {
