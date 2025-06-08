@@ -514,9 +514,8 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
         for (int i = 0; i < item.exercises.length; i++) {
           final exercise = item.exercises[i];
           singleCycleDuration += exercise.workTimeInSeconds;
-          // Add rest time only if it's not the last exercise in the cycle
-          if (exercise.restTimeInSeconds != null &&
-              i < item.exercises.length - 1) {
+          // Add rest time for each exercise that has it defined
+          if (exercise.restTimeInSeconds != null) {
             singleCycleDuration += exercise.restTimeInSeconds!;
           }
         }

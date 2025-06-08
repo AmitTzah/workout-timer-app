@@ -404,9 +404,19 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
               child: const Text('Save'),
               onPressed: () {
                 final int? newWorkTime = int.tryParse(workTimeController.text.trim());
-                final int? newRestTime = int.tryParse(restTimeController.text.trim());
+                final String restText = restTimeController.text.trim();
+                final int? newRestTime = restText.isEmpty ? null : int.tryParse(restText);
 
                 if (selectedExerciseName != null && newWorkTime != null && newWorkTime > 0) {
+                  if (restText.isNotEmpty && newRestTime == null) {
+                    // Handle invalid (non-empty, non-numeric) rest time input
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Please enter a valid rest time or leave it empty.'),
+                      ),
+                    );
+                    return;
+                  }
                   Navigator.of(context).pop(
                     Exercise(
                       id: currentExercise.id,
@@ -539,7 +549,13 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
             ElevatedButton(
               child: const Text('Save'),
               onPressed: () {
-                final int? newGroupRest = int.tryParse(groupRestController.text.trim());
+                final String restText = groupRestController.text.trim();
+                if (restText.isEmpty) {
+                  widget.onEditGroup(group.id, group.name, group.cycles, null);
+                  Navigator.of(context).pop();
+                  return;
+                }
+                final int? newGroupRest = int.tryParse(restText);
                 if (newGroupRest != null && newGroupRest >= 0) {
                   widget.onEditGroup(group.id, group.name, group.cycles, newGroupRest);
                   Navigator.of(context).pop();
