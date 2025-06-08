@@ -28,11 +28,14 @@ class WorkoutController extends ChangeNotifier {
   UserWorkout get workout => _workout;
   int get totalSetsCompleted => _workoutLogicService.totalSetsCompleted;
   bool get isPaused => !_stopWatchTimer.isRunning;
-  List<WorkoutSet> get exercisesToPerform => _workoutLogicService.exercisesToPerform;
+  List<WorkoutSet> get exercisesToPerform =>
+      _workoutLogicService.exercisesToPerform;
   int get currentOverallSetIndex => _workoutLogicService.currentOverallSetIndex;
-  double get totalExpectedWorkoutDuration => _workoutLogicService.totalWorkoutDurationWithRests.toDouble();
+  double get totalExpectedWorkoutDuration =>
+      _workoutLogicService.totalWorkoutDurationWithRests.toDouble();
 
-  Stream<int> get currentIntervalTimeRemainingStream => _stopWatchTimer.rawTime.map(_calculateCurrentIntervalTimeRemaining);
+  Stream<int> get currentIntervalTimeRemainingStream =>
+      _stopWatchTimer.rawTime.map(_calculateCurrentIntervalTimeRemaining);
 
   int _calculateCurrentIntervalTimeRemaining(int rawTimeValue) {
     if (_isWorkoutFinished) return 0;
@@ -59,36 +62,46 @@ class WorkoutController extends ChangeNotifier {
           if (set.isRestBlock) {
             cumulativeDurationOfCompletedSetsSec += set.restBlockDuration!;
           } else {
-            cumulativeDurationOfCompletedSetsSec += (set.exercise.restTimeInSeconds ?? 0);
+            cumulativeDurationOfCompletedSetsSec +=
+                (set.exercise.restTimeInSeconds ?? 0);
           }
         } else {
-          cumulativeDurationOfCompletedSetsSec += set.exercise.workTimeInSeconds;
+          cumulativeDurationOfCompletedSetsSec +=
+              set.exercise.workTimeInSeconds;
         }
       } else if (_workoutLogicService.isSurvivalMode) {
-        final set = _workoutLogicService.exercisesToPerform[i % _workoutLogicService.exercisesToPerform.length];
+        final set =
+            _workoutLogicService.exercisesToPerform[i %
+                _workoutLogicService.exercisesToPerform.length];
         if (set.isRestSet) {
           if (set.isRestBlock) {
             cumulativeDurationOfCompletedSetsSec += set.restBlockDuration!;
           } else {
-            cumulativeDurationOfCompletedSetsSec += (set.exercise.restTimeInSeconds ?? 0);
+            cumulativeDurationOfCompletedSetsSec +=
+                (set.exercise.restTimeInSeconds ?? 0);
           }
         } else {
-          cumulativeDurationOfCompletedSetsSec += set.exercise.workTimeInSeconds;
+          cumulativeDurationOfCompletedSetsSec +=
+              set.exercise.workTimeInSeconds;
         }
       }
     }
 
-    final int elapsedInCurrentIntervalMs = rawTimeValue - (cumulativeDurationOfCompletedSetsSec * 1000);
-    final int remainingMs = (currentSetDurationSec * 1000) - elapsedInCurrentIntervalMs;
+    final int elapsedInCurrentIntervalMs =
+        rawTimeValue - (cumulativeDurationOfCompletedSetsSec * 1000);
+    final int remainingMs =
+        (currentSetDurationSec * 1000) - elapsedInCurrentIntervalMs;
     return remainingMs > 0 ? remainingMs : 0;
   }
 
-  Stream<int> get totalTimeRemainingStream => _stopWatchTimer.rawTime.map(_calculateTotalTimeRemaining);
+  Stream<int> get totalTimeRemainingStream =>
+      _stopWatchTimer.rawTime.map(_calculateTotalTimeRemaining);
 
   int _calculateTotalTimeRemaining(int rawTimeValue) {
     if (_workoutLogicService.isSurvivalMode) return 0;
     if (_isWorkoutFinished) return 0;
-    final int remainingMs = (totalExpectedWorkoutDuration * 1000).round() - rawTimeValue;
+    final int remainingMs =
+        (totalExpectedWorkoutDuration * 1000).round() - rawTimeValue;
     return remainingMs > 0 ? remainingMs : 0;
   }
 
@@ -121,12 +134,14 @@ class WorkoutController extends ChangeNotifier {
 
     await _rawTimeSubscription?.cancel();
     _rawTimeSubscription = null;
-    
+
     if (_stopWatchTimer.isRunning) {
-        _stopWatchTimer.onStopTimer();
-        debugPrint('Workout manually finished. StopWatchTimer stopped.');
+      _stopWatchTimer.onStopTimer();
+      debugPrint('Workout manually finished. StopWatchTimer stopped.');
     } else {
-        debugPrint('Workout manually finished. StopWatchTimer was already stopped.');
+      debugPrint(
+        'Workout manually finished. StopWatchTimer was already stopped.',
+      );
     }
     _finishWorkoutInternal();
   }
@@ -136,13 +151,13 @@ class WorkoutController extends ChangeNotifier {
     required AudioService audioService,
     required WorkoutType workoutType,
     required dynamic selectedLevelOrMode,
-  })  : _workout = workout,
-        _audioService = audioService,
-        _workoutLogicService = WorkoutLogicService(
-          baseWorkout: workout,
-          workoutType: workoutType,
-          selectedLevelOrMode: selectedLevelOrMode,
-        ) {
+  }) : _workout = workout,
+       _audioService = audioService,
+       _workoutLogicService = WorkoutLogicService(
+         baseWorkout: workout,
+         workoutType: workoutType,
+         selectedLevelOrMode: selectedLevelOrMode,
+       ) {
     _workoutStartTime = DateTime.now();
 
     if (_workoutLogicService.exercisesToPerform.isNotEmpty) {
@@ -164,7 +179,8 @@ class WorkoutController extends ChangeNotifier {
         if (currentSet.isRestBlock) {
           await _audioService.playRestSound();
         } else {
-          await _audioService.playRestSound(); // Play rest sound for per-exercise rest
+          await _audioService
+              .playRestSound(); // Play rest sound for per-exercise rest
         }
       } else {
         await _audioService.playJustExerciseSound(currentSet.exercise.name);
@@ -173,7 +189,7 @@ class WorkoutController extends ChangeNotifier {
   }
 
   void _startTimerListener() {
-    _rawTimeSubscription?.cancel(); 
+    _rawTimeSubscription?.cancel();
     _rawTimeSubscription = _stopWatchTimer.rawTime.listen((value) async {
       _currentRawTimeMs = value;
       if (!_stopWatchTimer.isRunning) return;
@@ -181,12 +197,21 @@ class WorkoutController extends ChangeNotifier {
       int currentSetDurationMs = 0;
       if (_workoutLogicService.currentWorkoutSet?.isRestSet == true) {
         if (_workoutLogicService.currentWorkoutSet!.isRestBlock) {
-          currentSetDurationMs = _workoutLogicService.currentWorkoutSet!.restBlockDuration! * 1000;
+          currentSetDurationMs =
+              _workoutLogicService.currentWorkoutSet!.restBlockDuration! * 1000;
         } else {
-          currentSetDurationMs = (_workoutLogicService.currentWorkoutSet!.exercise.restTimeInSeconds ?? 0) * 1000;
+          currentSetDurationMs =
+              (_workoutLogicService
+                      .currentWorkoutSet!
+                      .exercise
+                      .restTimeInSeconds ??
+                  0) *
+              1000;
         }
       } else {
-        currentSetDurationMs = _workoutLogicService.currentWorkoutSet!.exercise.workTimeInSeconds * 1000;
+        currentSetDurationMs =
+            _workoutLogicService.currentWorkoutSet!.exercise.workTimeInSeconds *
+            1000;
       }
 
       int cumulativeDurationOfCompletedSets = 0;
@@ -196,13 +221,15 @@ class WorkoutController extends ChangeNotifier {
           if (set.isRestBlock) {
             cumulativeDurationOfCompletedSets += set.restBlockDuration!;
           } else {
-            cumulativeDurationOfCompletedSets += (set.exercise.restTimeInSeconds ?? 0);
+            cumulativeDurationOfCompletedSets +=
+                (set.exercise.restTimeInSeconds ?? 0);
           }
         } else {
           cumulativeDurationOfCompletedSets += set.exercise.workTimeInSeconds;
         }
       }
-      final int elapsedInCurrentIntervalMs = value - (cumulativeDurationOfCompletedSets * 1000);
+      final int elapsedInCurrentIntervalMs =
+          value - (cumulativeDurationOfCompletedSets * 1000);
 
       if (elapsedInCurrentIntervalMs >= currentSetDurationMs) {
         bool workoutContinues = _workoutLogicService.moveToNextSet();
@@ -222,7 +249,8 @@ class WorkoutController extends ChangeNotifier {
           _isWorkoutFinished = true;
           notifyListeners();
 
-          if (!_workoutLogicService.isSurvivalMode && !_workoutCompletedAudioPlayed) {
+          if (!_workoutLogicService.isSurvivalMode &&
+              !_workoutCompletedAudioPlayed) {
             _workoutCompletedAudioPlayed = true;
             await _audioService.playSessionComplete();
             debugPrint('Played workout_complete.wav');
@@ -230,18 +258,20 @@ class WorkoutController extends ChangeNotifier {
 
           await _rawTimeSubscription?.cancel();
           _rawTimeSubscription = null;
-          
+
           if (_stopWatchTimer.isRunning) {
-              _stopWatchTimer.onStopTimer();
-              debugPrint('Workout finished naturally. StopWatchTimer stopped.');
+            _stopWatchTimer.onStopTimer();
+            debugPrint('Workout finished naturally. StopWatchTimer stopped.');
           } else {
-              debugPrint('Workout finished naturally. StopWatchTimer was already stopped.');
+            debugPrint(
+              'Workout finished naturally. StopWatchTimer was already stopped.',
+            );
           }
           _finishWorkoutInternal();
         }
       }
       if (_rawTimeSubscription != null && !_isWorkoutFinished) {
-          notifyListeners(); 
+        notifyListeners();
       }
     });
   }
@@ -249,9 +279,12 @@ class WorkoutController extends ChangeNotifier {
   void _finishWorkoutInternal() {
     _workoutStartTime ??= DateTime.now();
 
-    final WorkoutCompletionDetails details = _determineWorkoutCompletionDetails();
+    final WorkoutCompletionDetails details =
+        _determineWorkoutCompletionDetails();
 
-    debugPrint('Creating WorkoutSummary. totalWorkoutDuration: ${_currentRawTimeMs / 1000.0} seconds');
+    debugPrint(
+      'Creating WorkoutSummary. totalWorkoutDuration: ${_currentRawTimeMs / 1000.0} seconds',
+    );
     final summary = _createWorkoutSummary(details);
     _onWorkoutFinished?.call(summary);
   }
@@ -261,22 +294,40 @@ class WorkoutController extends ChangeNotifier {
     List<WorkoutSet> finalPerformedSets;
 
     if (_workoutLogicService.isSurvivalMode) {
-      wasStoppedPrematurely = false;
+      wasStoppedPrematurely = true; // Survival mode is always "stopped" by the user
       finalPerformedSets = [];
       if (_workoutLogicService.exercisesToPerform.isNotEmpty) {
-        int fullCycles = _workoutLogicService.totalSetsCompleted ~/ _workoutLogicService.exercisesToPerform.length;
-        int remainingSets = _workoutLogicService.totalSetsCompleted % _workoutLogicService.exercisesToPerform.length;
-
-        for (int i = 0; i < fullCycles; i++) {
-          finalPerformedSets.addAll(_workoutLogicService.exercisesToPerform);
-        }
-        if (remainingSets > 0) {
-          finalPerformedSets.addAll(_workoutLogicService.exercisesToPerform.sublist(0, remainingSets));
+        int workSetsCounted = 0;
+        int i = 0;
+        while(workSetsCounted < _workoutLogicService.totalSetsCompleted) {
+          final set = _workoutLogicService.exercisesToPerform[i % _workoutLogicService.exercisesToPerform.length];
+          finalPerformedSets.add(set);
+          if (!set.isRestSet) {
+            workSetsCounted++;
+          }
+          i++;
         }
       }
     } else {
-      wasStoppedPrematurely = (_workoutLogicService.totalSetsCompleted < _workoutLogicService.exercisesToPerform.length);
-      finalPerformedSets = _workoutLogicService.exercisesToPerform.sublist(0, wasStoppedPrematurely ? _workoutLogicService.totalSetsCompleted : _workoutLogicService.exercisesToPerform.length);
+      wasStoppedPrematurely = (_workoutLogicService.totalSetsCompleted < _workoutLogicService.totalSetsInPlan);
+      if (wasStoppedPrematurely) {
+        int workSetsCounted = 0;
+        int endIndex = 0;
+        for (int i = 0; i < _workoutLogicService.exercisesToPerform.length; i++) {
+          final set = _workoutLogicService.exercisesToPerform[i];
+          if (!set.isRestSet) {
+            workSetsCounted++;
+          }
+          if (workSetsCounted > _workoutLogicService.totalSetsCompleted) {
+            endIndex = i;
+            break;
+          }
+          endIndex = i + 1;
+        }
+        finalPerformedSets = _workoutLogicService.exercisesToPerform.sublist(0, endIndex);
+      } else {
+        finalPerformedSets = _workoutLogicService.exercisesToPerform;
+      }
     }
     return WorkoutCompletionDetails(wasStoppedPrematurely, finalPerformedSets);
   }
@@ -287,12 +338,16 @@ class WorkoutController extends ChangeNotifier {
       performedSets: details.finalPerformedSets,
       totalDurationInSeconds: (_currentRawTimeMs / 1000.0).round(),
       workoutName: _workout.name,
-      workoutLevel: _workoutLogicService.isSurvivalMode ? 1 : (_workoutLogicService.selectedLevelOrMode is int ? _workoutLogicService.selectedLevelOrMode : 1),
+      workoutLevel: _workoutLogicService.isSurvivalMode
+          ? 1
+          : (_workoutLogicService.selectedLevelOrMode is int
+                ? _workoutLogicService.selectedLevelOrMode
+                : 1),
       isSurvivalMode: _workoutLogicService.isSurvivalMode,
       workoutType: _workoutLogicService.workoutType,
       // intervalTime: _workout.intervalTimeBetweenSets, // Removed as it's no longer global
       wasStoppedPrematurely: details.wasStoppedPrematurely,
-      totalSets: details.finalPerformedSets.length,
+      totalSets: _workoutLogicService.totalSetsCompleted,
     );
   }
 }
