@@ -58,9 +58,7 @@ class _WorkoutCardState extends State<WorkoutCard> {
             const SizedBox(height: 16),
             _buildWorkoutSequence(context),
             const SizedBox(height: 16),
-            _buildControlsSection(context),
-            const SizedBox(height: 16),
-            _buildActionButtons(context),
+            _buildWorkoutControls(context),
           ],
         ),
       ),
@@ -179,105 +177,114 @@ class _WorkoutCardState extends State<WorkoutCard> {
     );
   }
 
-  Widget _buildControlsSection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        InkWell(
-          onTap: () async {
-            final int? selectedValue =
-                await widget.showLevelSelectionBottomSheet(
-              context,
-              widget.levelSelections[widget.workout.id] ?? 1,
-              widget.workout,
-            );
-            if (selectedValue != null) {
-              widget.levelSelections[widget.workout.id] = selectedValue;
-              widget.workout.selectedLevel = selectedValue;
-              await _userWorkoutRepository.saveUserWorkout(widget.workout);
-              widget.onSelectionsChanged();
-            }
-          },
-          child: Container(
-            padding:
-                const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(4.0),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
+  Widget _buildWorkoutControls(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(8.0),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              ElevatedButton.icon(
+                onPressed: () async {
+                  final int? selectedValue =
+                      await widget.showLevelSelectionBottomSheet(
+                    context,
+                    widget.levelSelections[widget.workout.id] ?? 1,
+                    widget.workout,
+                  );
+                  if (selectedValue != null) {
+                    widget.levelSelections[widget.workout.id] = selectedValue;
+                    widget.workout.selectedLevel = selectedValue;
+                    await _userWorkoutRepository
+                        .saveUserWorkout(widget.workout);
+                    widget.onSelectionsChanged();
+                  }
+                },
+                icon: const Icon(Icons.leaderboard),
+                label: Text(
                   'Level: L${widget.levelSelections[widget.workout.id] ?? 1} (+${((widget.levelSelections[widget.workout.id] ?? 1) == 1 ? 0 : (((((widget.levelSelections[widget.workout.id] ?? 1) - 1) * 20))))}%)',
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(width: 8),
-                const Icon(Icons.arrow_drop_down),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Checkbox(
-              value: widget.survivalModeSelections[widget.workout.id] ?? false,
-              onChanged: (bool? newValue) async {
-                widget.survivalModeSelections[widget.workout.id] =
-                    newValue ?? false;
-                widget.workout.selectedSurvivalMode = newValue ?? false;
-                await _userWorkoutRepository.saveUserWorkout(widget.workout);
-                widget.onSelectionsChanged();
-              },
-            ),
-            const Text('Survival Mode'),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActionButtons(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        ElevatedButton.icon(
-          icon: const Icon(Icons.play_arrow),
-          label: const Text("Start"),
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => WorkoutScreen(
-                  workout: widget.workout,
-                  workoutType: widget.workout.workoutType,
-                  selectedLevelOrMode:
-                      widget.survivalModeSelections[widget.workout.id] == true
-                          ? "survival"
-                          : (widget.levelSelections[widget.workout.id] ?? 1),
+              ),
+              ElevatedButton.icon(
+                onPressed: () {
+                  bool currentValue =
+                      widget.survivalModeSelections[widget.workout.id] ?? false;
+                  widget.survivalModeSelections[widget.workout.id] =
+                      !currentValue;
+                  widget.workout.selectedSurvivalMode = !currentValue;
+                  _userWorkoutRepository.saveUserWorkout(widget.workout);
+                  widget.onSelectionsChanged();
+                },
+                icon: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder:
+                      (Widget child, Animation<double> animation) {
+                    return ScaleTransition(scale: animation, child: child);
+                  },
+                  child: Icon(
+                    widget.survivalModeSelections[widget.workout.id] ?? false
+                        ? Icons.check_box
+                        : Icons.check_box_outline_blank,
+                    key: ValueKey<bool>(
+                        widget.survivalModeSelections[widget.workout.id] ??
+                            false),
+                  ),
                 ),
+                label: const Text('Survival'),
               ),
-            );
-          },
-        ),
-        ElevatedButton.icon(
-          icon: const Icon(Icons.edit),
-          label: const Text("Edit"),
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) =>
-                    DefineWorkoutScreen(workout: widget.workout),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              ElevatedButton.icon(
+                icon: const Icon(Icons.play_arrow),
+                label: const Text("Start"),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => WorkoutScreen(
+                        workout: widget.workout,
+                        workoutType: widget.workout.workoutType,
+                        selectedLevelOrMode:
+                            widget.survivalModeSelections[widget.workout.id] ==
+                                    true
+                                ? "survival"
+                                : (widget.levelSelections[widget.workout.id] ??
+                                    1),
+                      ),
+                    ),
+                  );
+                },
               ),
-            );
-          },
-        ),
-        ElevatedButton.icon(
-          icon: const Icon(Icons.delete),
-          label: const Text("Delete"),
-          onPressed: () => widget.deleteWorkout(widget.workout.id),
-        ),
-      ],
+              ElevatedButton.icon(
+                icon: const Icon(Icons.edit),
+                label: const Text("Edit"),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          DefineWorkoutScreen(workout: widget.workout),
+                    ),
+                  );
+                },
+              ),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.delete),
+                label: const Text("Delete"),
+                onPressed: () => widget.deleteWorkout(widget.workout.id),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
