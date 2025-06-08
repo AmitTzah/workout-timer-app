@@ -471,22 +471,24 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
     for (var item in _workoutItems) {
       if (item is ExerciseItem) {
         totalDuration += item.exercise.sets * item.exercise.workTimeInSeconds;
-        if (item.exercise.restTimeInSeconds != null) {
-          totalDuration +=
-              item.exercise.sets * item.exercise.restTimeInSeconds!;
+        if (item.exercise.restTimeInSeconds != null && item.exercise.sets > 1) {
+          totalDuration += (item.exercise.sets - 1) * item.exercise.restTimeInSeconds!;
         }
       } else if (item is RestBlockItem) {
         totalDuration += item.durationInSeconds;
       } else if (item is AlternatingGroupItem) {
-        // For alternating groups, calculate duration based on cycles and exercise times
-        int groupExercisesDuration = 0;
-        for (var exercise in item.exercises) {
-          groupExercisesDuration += exercise.workTimeInSeconds;
-          if (exercise.restTimeInSeconds != null) {
-            groupExercisesDuration += exercise.restTimeInSeconds!;
+        int singleCycleDuration = 0;
+        for (int i = 0; i < item.exercises.length; i++) {
+          final exercise = item.exercises[i];
+          singleCycleDuration += exercise.workTimeInSeconds;
+          // Add rest time only if it's not the last exercise in the cycle
+          if (exercise.restTimeInSeconds != null && i < item.exercises.length - 1) {
+            singleCycleDuration += exercise.restTimeInSeconds!;
           }
         }
-        totalDuration += groupExercisesDuration * item.cycles;
+        
+        totalDuration += singleCycleDuration * item.cycles;
+
         // Add group rest for each cycle except the last one
         if (item.groupRestInSeconds != null && item.cycles > 1) {
           totalDuration += item.groupRestInSeconds! * (item.cycles - 1);
