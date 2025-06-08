@@ -124,7 +124,7 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Workout Sequence Performed:',
+                              'Workout Plan Performed:',
                               style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 8),

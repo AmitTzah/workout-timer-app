@@ -28,10 +28,10 @@ class WorkoutLogicService {
     required UserWorkout baseWorkout,
     required WorkoutType workoutType,
     required dynamic selectedLevelOrMode,
-  })  : _baseWorkout = baseWorkout,
-        _workoutType = workoutType,
-        _selectedLevelOrMode = selectedLevelOrMode {
-    _initializeWorkoutSequence();
+  }) : _baseWorkout = baseWorkout,
+       _workoutType = workoutType,
+       _selectedLevelOrMode = selectedLevelOrMode {
+    _initializeWorkoutPlan();
   }
 
   // Public Getters
@@ -42,18 +42,19 @@ class WorkoutLogicService {
 
   WorkoutSet? get currentWorkoutSet =>
       _exercisesToPerform.isNotEmpty &&
-              _currentOverallSetIndex < _exercisesToPerform.length
-          ? _exercisesToPerform[_currentOverallSetIndex]
-          : null;
+          _currentOverallSetIndex < _exercisesToPerform.length
+      ? _exercisesToPerform[_currentOverallSetIndex]
+      : null;
 
-  int get totalSetsInSequence => _totalExerciseSets;
+  int get totalSetsInPlan => _totalExerciseSets;
 
   /// Calculates the total expected duration of the workout including rest periods.
   int get totalWorkoutDurationWithRests {
     int totalDuration = 0;
     for (final set in _exercisesToPerform) {
       if (set.isRestSet) {
-        totalDuration += set.restBlockDuration ?? (set.exercise.restTimeInSeconds ?? 0);
+        totalDuration +=
+            set.restBlockDuration ?? (set.exercise.restTimeInSeconds ?? 0);
       } else {
         totalDuration += set.exercise.workTimeInSeconds;
       }
@@ -61,41 +62,56 @@ class WorkoutLogicService {
     return totalDuration;
   }
 
-  /// Initializes the workout sequence based on level/mode and alternation.
-  void _initializeWorkoutSequence() {
-    List<WorkoutSet> sequence = [];
+  /// Initializes the workout plan based on level/mode and alternation.
+  void _initializeWorkoutPlan() {
+    List<WorkoutSet> workoutPlan = [];
 
     if (_workoutType == WorkoutType.sequential) {
       // Sequential Mode
       for (var item in _baseWorkout.items) {
         if (item is ExerciseItem) {
-          final adjustedExercise = _applyLevelModifier([item]).first; // Apply level modifier to single exercise
+          final adjustedExercise = _applyLevelModifier([
+            item,
+          ]).first; // Apply level modifier to single exercise
           for (int s = 1; s <= adjustedExercise.sets; s++) {
-            sequence.add(WorkoutSet(
-              exercise: adjustedExercise,
-              setNumber: s,
-              isRestSet: false,
-              isRestBlock: false,
-            ));
-            // Add per-set rest if defined and not the last set
-            if (adjustedExercise.restTimeInSeconds != null && adjustedExercise.restTimeInSeconds! > 0 && s < adjustedExercise.sets) {
-              sequence.add(WorkoutSet(
+            workoutPlan.add(
+              WorkoutSet(
                 exercise: adjustedExercise,
                 setNumber: s,
-                isRestSet: true,
+                isRestSet: false,
                 isRestBlock: false,
-                restBlockDuration: adjustedExercise.restTimeInSeconds,
-              ));
+              ),
+            );
+            // Add per-set rest if defined and not the last set
+            if (adjustedExercise.restTimeInSeconds != null &&
+                adjustedExercise.restTimeInSeconds! > 0 &&
+                s < adjustedExercise.sets) {
+              workoutPlan.add(
+                WorkoutSet(
+                  exercise: adjustedExercise,
+                  setNumber: s,
+                  isRestSet: true,
+                  isRestBlock: false,
+                  restBlockDuration: adjustedExercise.restTimeInSeconds,
+                ),
+              );
             }
           }
         } else if (item is RestBlockItem) {
-          sequence.add(WorkoutSet(
-            exercise: Exercise(id: item.id, name: 'Rest Block', sets: 1, workTimeInSeconds: item.durationInSeconds),
-            setNumber: 1,
-            isRestSet: true,
-            isRestBlock: true,
-            restBlockDuration: item.durationInSeconds,
-          ));
+          workoutPlan.add(
+            WorkoutSet(
+              exercise: Exercise(
+                id: item.id,
+                name: 'Rest Block',
+                sets: 1,
+                workTimeInSeconds: item.durationInSeconds,
+              ),
+              setNumber: 1,
+              isRestSet: true,
+              isRestBlock: true,
+              restBlockDuration: item.durationInSeconds,
+            ),
+          );
         }
       }
     } else {
@@ -108,53 +124,73 @@ class WorkoutLogicService {
           for (int cycle = 0; cycle < adjustedCycles; cycle++) {
             for (var exercise in exercisesInGroup) {
               // Add work set
-              sequence.add(WorkoutSet(
-                exercise: exercise,
-                setNumber: cycle + 1, // Cycle number as set number
-                isRestSet: false,
-                isRestBlock: false,
-              ));
-              // Add per-exercise rest if defined
-              if (exercise.restTimeInSeconds != null && exercise.restTimeInSeconds! > 0) {
-                sequence.add(WorkoutSet(
+              workoutPlan.add(
+                WorkoutSet(
                   exercise: exercise,
-                  setNumber: cycle + 1,
-                  isRestSet: true,
+                  setNumber: cycle + 1, // Cycle number as set number
+                  isRestSet: false,
                   isRestBlock: false,
-                  restBlockDuration: exercise.restTimeInSeconds,
-                ));
+                ),
+              );
+              // Add per-exercise rest if defined
+              if (exercise.restTimeInSeconds != null &&
+                  exercise.restTimeInSeconds! > 0) {
+                workoutPlan.add(
+                  WorkoutSet(
+                    exercise: exercise,
+                    setNumber: cycle + 1,
+                    isRestSet: true,
+                    isRestBlock: false,
+                    restBlockDuration: exercise.restTimeInSeconds,
+                  ),
+                );
               }
             }
             // Add group rest after each cycle, except the last one
-            if (item.groupRestInSeconds != null && item.groupRestInSeconds! > 0 && cycle < adjustedCycles - 1) {
-              sequence.add(WorkoutSet(
-                exercise: Exercise(id: const Uuid().v4(), name: 'Group Rest', sets: 1, workTimeInSeconds: item.groupRestInSeconds!),
-                setNumber: cycle + 1,
-                isRestSet: true,
-                isRestBlock: true,
-                restBlockDuration: item.groupRestInSeconds,
-              ));
+            if (item.groupRestInSeconds != null &&
+                item.groupRestInSeconds! > 0 &&
+                cycle < adjustedCycles - 1) {
+              workoutPlan.add(
+                WorkoutSet(
+                  exercise: Exercise(
+                    id: const Uuid().v4(),
+                    name: 'Group Rest',
+                    sets: 1,
+                    workTimeInSeconds: item.groupRestInSeconds!,
+                  ),
+                  setNumber: cycle + 1,
+                  isRestSet: true,
+                  isRestBlock: true,
+                  restBlockDuration: item.groupRestInSeconds,
+                ),
+              );
             }
           }
         } else if (item is RestBlockItem) {
-          // Rest blocks are added directly at their position in the main sequence
-          sequence.add(WorkoutSet(
-            exercise: Exercise(id: item.id, name: 'Rest Block', sets: 1, workTimeInSeconds: item.durationInSeconds),
-            setNumber: 1,
-            isRestSet: true,
-            isRestBlock: true,
-            restBlockDuration: item.durationInSeconds,
-          ));
+          // Rest blocks are added directly at their position in the main plan
+          workoutPlan.add(
+            WorkoutSet(
+              exercise: Exercise(
+                id: item.id,
+                name: 'Rest Block',
+                sets: 1,
+                workTimeInSeconds: item.durationInSeconds,
+              ),
+              setNumber: 1,
+              isRestSet: true,
+              isRestBlock: true,
+              restBlockDuration: item.durationInSeconds,
+            ),
+          );
         }
       }
     }
 
-    _exercisesToPerform = sequence;
-    _totalExerciseSets =
-        sequence.where((set) => !set.isRestSet).length;
+    _exercisesToPerform = workoutPlan;
+    _totalExerciseSets = workoutPlan.where((set) => !set.isRestSet).length;
   }
 
-  /// Advances to the next set in the workout sequence.
+  /// Advances to the next set in the workout plan.
   /// Returns true if the workout continues, false if it has naturally completed.
   bool moveToNextSet() {
     // Only increment total sets completed if the set that just finished was not a rest set.
@@ -178,14 +214,22 @@ class WorkoutLogicService {
   /// Applies level modifiers to the workout exercises for sequential mode.
   List<Exercise> _applyLevelModifier(List<ExerciseItem> originalExerciseItems) {
     List<Exercise> adjustedExercises = [];
-    if (_selectedLevelOrMode is int && _selectedLevelOrMode >= 1 && _selectedLevelOrMode <= 10) {
+    if (_selectedLevelOrMode is int &&
+        _selectedLevelOrMode >= 1 &&
+        _selectedLevelOrMode <= 10) {
       final int level = _selectedLevelOrMode;
-      int originalTotalSets = originalExerciseItems.fold(0, (sum, item) => sum + item.exercise.sets);
+      int originalTotalSets = originalExerciseItems.fold(
+        0,
+        (sum, item) => sum + item.exercise.sets,
+      );
       if (originalTotalSets == 0) {
         return originalExerciseItems.map((e) => e.exercise).toList();
       }
 
-      int targetTotalSets = _calculateTotalSetsForLevelStatic(level, originalTotalSets);
+      int targetTotalSets = _calculateTotalSetsForLevelStatic(
+        level,
+        originalTotalSets,
+      );
 
       int currentSumOfAdjustedSets = 0;
       List<Exercise> tempAdjustedExercises = [];
@@ -198,15 +242,17 @@ class WorkoutLogicService {
         if (exercise.sets > 0 && adjustedSets == 0) {
           adjustedSets = 1;
         }
-        tempAdjustedExercises.add(Exercise(
-          id: exercise.id, // Pass existing ID
-          name: exercise.name,
-          sets: adjustedSets,
-          reps: exercise.reps,
-          workTimeInSeconds: exercise.workTimeInSeconds,
-          restTimeInSeconds: exercise.restTimeInSeconds,
-          audioFileName: exercise.audioFileName,
-        ));
+        tempAdjustedExercises.add(
+          Exercise(
+            id: exercise.id, // Pass existing ID
+            name: exercise.name,
+            sets: adjustedSets,
+            reps: exercise.reps,
+            workTimeInSeconds: exercise.workTimeInSeconds,
+            restTimeInSeconds: exercise.restTimeInSeconds,
+            audioFileName: exercise.audioFileName,
+          ),
+        );
         currentSumOfAdjustedSets += adjustedSets;
       }
 
@@ -214,7 +260,8 @@ class WorkoutLogicService {
       if (difference != 0 && tempAdjustedExercises.isNotEmpty) {
         int largestSetIndex = 0;
         for (int i = 1; i < tempAdjustedExercises.length; i++) {
-          if (tempAdjustedExercises[i].sets > tempAdjustedExercises[largestSetIndex].sets) {
+          if (tempAdjustedExercises[i].sets >
+              tempAdjustedExercises[largestSetIndex].sets) {
             largestSetIndex = i;
           }
         }
@@ -223,7 +270,9 @@ class WorkoutLogicService {
         tempAdjustedExercises[largestSetIndex] = Exercise(
           id: exerciseToAdjust.id, // Pass existing ID
           name: exerciseToAdjust.name,
-          sets: (exerciseToAdjust.sets + difference).clamp(1, double.infinity).toInt(),
+          sets: (exerciseToAdjust.sets + difference)
+              .clamp(1, double.infinity)
+              .toInt(),
           reps: exerciseToAdjust.reps,
           workTimeInSeconds: exerciseToAdjust.workTimeInSeconds,
           restTimeInSeconds: exerciseToAdjust.restTimeInSeconds,
@@ -239,7 +288,9 @@ class WorkoutLogicService {
 
   /// Calculates the adjusted number of cycles for an alternating group based on the selected level.
   int _calculateAdjustedCyclesForLevel(int originalCycles) {
-    if (_selectedLevelOrMode is int && _selectedLevelOrMode >= 1 && _selectedLevelOrMode <= 10) {
+    if (_selectedLevelOrMode is int &&
+        _selectedLevelOrMode >= 1 &&
+        _selectedLevelOrMode <= 10) {
       final int level = _selectedLevelOrMode;
       return _calculateTotalSetsForLevelStatic(level, originalCycles);
     }
@@ -247,7 +298,10 @@ class WorkoutLogicService {
   }
 
   /// Helper to calculate total sets for a given level, ensuring strict increase.
-  static int _calculateTotalSetsForLevelStatic(int level, int originalTotalSets) {
+  static int _calculateTotalSetsForLevelStatic(
+    int level,
+    int originalTotalSets,
+  ) {
     if (originalTotalSets == 0) return 0;
 
     double multiplier;
@@ -260,7 +314,10 @@ class WorkoutLogicService {
     int calculatedSets = (originalTotalSets * multiplier).ceil();
 
     if (level > 1) {
-      int previousLevelSets = _calculateTotalSetsForLevelStatic(level - 1, originalTotalSets);
+      int previousLevelSets = _calculateTotalSetsForLevelStatic(
+        level - 1,
+        originalTotalSets,
+      );
       if (calculatedSets <= previousLevelSets) {
         calculatedSets = previousLevelSets + 1;
       }

@@ -4,10 +4,10 @@ import 'package:exercise_timer_app/models/rest_block_item.dart';
 import 'package:exercise_timer_app/models/alternating_group_item.dart';
 import 'package:exercise_timer_app/models/exercise.dart';
 
-class WorkoutSequence extends StatelessWidget {
+class WorkoutPlan extends StatelessWidget {
   final List<WorkoutItem> items;
 
-  const WorkoutSequence({
+  const WorkoutPlan({
     super.key,
     required this.items,
   });
@@ -18,7 +18,7 @@ class WorkoutSequence extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Workout Sequence:',
+          'Workout Plan:',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),

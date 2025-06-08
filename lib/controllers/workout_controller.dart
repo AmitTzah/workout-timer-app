@@ -97,7 +97,7 @@ class WorkoutController extends ChangeNotifier {
   Stream<int> get elapsedSurvivalTimeStream => _stopWatchTimer.rawTime;
 
   WorkoutSet? get currentWorkoutSet => _workoutLogicService.currentWorkoutSet;
-  int get totalSets => _workoutLogicService.totalSetsInSequence;
+  int get totalSets => _workoutLogicService.totalSetsInPlan;
 
   set onWorkoutFinished(Function(WorkoutSummary)? callback) {
     _onWorkoutFinished = callback;

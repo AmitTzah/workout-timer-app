@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:exercise_timer_app/models/user_workout.dart';
 import 'package:exercise_timer_app/widgets/workout_card/workout_card_header.dart';
-import 'package:exercise_timer_app/widgets/workout_card/workout_sequence.dart';
+import 'package:exercise_timer_app/widgets/workout_card/workout_plan.dart';
 import 'package:exercise_timer_app/widgets/workout_card/workout_card_controls.dart';
 
 class WorkoutCard extends StatelessWidget {
@@ -39,7 +39,7 @@ class WorkoutCard extends StatelessWidget {
               formatTime: formatTime,
             ),
             const SizedBox(height: 16),
-            WorkoutSequence(items: workout.items),
+            WorkoutPlan(items: workout.items),
             const SizedBox(height: 16),
             WorkoutCardControls(
               workout: workout,
