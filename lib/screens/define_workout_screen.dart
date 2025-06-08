@@ -590,14 +590,22 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
               WorkoutNameTextField(controller: _workoutNameController),
               const SizedBox(height: 20),
               SegmentedButton<WorkoutType>(
-                segments: const <ButtonSegment<WorkoutType>>[
+                segments: <ButtonSegment<WorkoutType>>[
                   ButtonSegment<WorkoutType>(
                     value: WorkoutType.sequential,
-                    label: Text('Sequential'),
+                    label: const Text('Sequential'),
+                    icon: Opacity(
+                      opacity: _workoutType == WorkoutType.sequential ? 1.0 : 0.0,
+                      child: const Icon(Icons.check),
+                    ),
                   ),
                   ButtonSegment<WorkoutType>(
                     value: WorkoutType.alternating,
-                    label: Text('Alternating'),
+                    label: const Text('Alternating'),
+                    icon: Opacity(
+                      opacity: _workoutType == WorkoutType.alternating ? 1.0 : 0.0,
+                      child: const Icon(Icons.check),
+                    ),
                   ),
                 ],
                 selected: <WorkoutType>{_workoutType},
