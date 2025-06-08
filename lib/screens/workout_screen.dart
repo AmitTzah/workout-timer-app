@@ -29,7 +29,8 @@ class WorkoutScreen extends StatefulWidget {
 class _WorkoutScreenState extends State<WorkoutScreen> {
   late WorkoutController _workoutController;
   final ScrollController _scrollController = ScrollController();
-  int _lastOverallSetIndex = -1; // Track the last index to prevent redundant scrolls
+  int _lastOverallSetIndex =
+      -1; // Track the last index to prevent redundant scrolls
 
   @override
   void initState() {
@@ -44,9 +45,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 
     _workoutController.addListener(_onControllerChanged);
     _workoutController.onWorkoutFinished = (summary) {
-      _navigateToWorkoutSummaryDisplay(
-        summary: summary,
-      );
+      _navigateToWorkoutSummaryDisplay(summary: summary);
     };
   }
 
@@ -76,19 +75,16 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     if (!mounted) return; // Check if the widget is still mounted
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => WorkoutSummaryDisplayScreen(
-          summary: summary,
-        ),
+        builder: (context) => WorkoutSummaryDisplayScreen(summary: summary),
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Workout: ${_workoutController.workout.name}'),
+        title: Text(_workoutController.workout.name),
         automaticallyImplyLeading: false,
       ),
       body: SafeArea(
@@ -107,8 +103,10 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
               WorkoutSetList(
                 scrollController: _scrollController,
                 exercisesToPerform: _workoutController.exercisesToPerform,
-                currentOverallSetIndex: _workoutController.currentOverallSetIndex,
-                currentIntervalTimeRemainingStream: _workoutController.currentIntervalTimeRemainingStream,
+                currentOverallSetIndex:
+                    _workoutController.currentOverallSetIndex,
+                currentIntervalTimeRemainingStream:
+                    _workoutController.currentIntervalTimeRemainingStream,
               ),
               WorkoutControls(
                 isPaused: _workoutController.isPaused,
