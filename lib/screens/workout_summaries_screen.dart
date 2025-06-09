@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:hive/hive.dart'; // Keep Hive import for Box type
 import 'package:workout_timer_app/models/workout_summary.dart';
-import 'package:workout_timer_app/repositories/workout_summary_repository.dart'; // Use the new repository
+import 'package:workout_timer_app/repositories/workout_summary_repository.dart';
+import 'package:workout_timer_app/screens/workout_calendar_screen.dart'; // Use the new repository
 // Import WorkoutType
 
 import 'package:intl/intl.dart'; // For date formatting
 
 class WorkoutSummariesScreen extends StatefulWidget {
-  const WorkoutSummariesScreen({super.key});
+  final WorkoutSummary? highlightedSummary;
+  const WorkoutSummariesScreen({super.key, this.highlightedSummary});
 
   @override
   State<WorkoutSummariesScreen> createState() => _WorkoutSummariesScreenState();
@@ -16,11 +18,20 @@ class WorkoutSummariesScreen extends StatefulWidget {
 
 class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
   late WorkoutSummaryRepository _workoutSummaryRepository;
+  final ScrollController _scrollController = ScrollController();
+  final Map<dynamic, GlobalKey> _summaryKeys = {};
+  String? _expandedWorkoutName;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _workoutSummaryRepository = Provider.of<WorkoutSummaryRepository>(context);
+    if (widget.highlightedSummary != null) {
+      _expandedWorkoutName = widget.highlightedSummary!.workoutName;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToSummary(widget.highlightedSummary!);
+      });
+    }
   }
 
   String _formatDuration(Duration duration) {
@@ -30,16 +41,21 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
     return '${twoDigits(duration.inHours)}:$minutes:$seconds';
   }
 
-
-  Future<bool?> _confirmDismiss(BuildContext context, String workoutName, {bool deleteAll = false}) async {
+  Future<bool?> _confirmDismiss(
+    BuildContext context,
+    String workoutName, {
+    bool deleteAll = false,
+  }) async {
     return showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Confirm Deletion'),
-          content: Text(deleteAll
-              ? 'Are you sure you want to delete all summaries for "$workoutName"?'
-              : 'Are you sure you want to delete this workout summary?'),
+          content: Text(
+            deleteAll
+                ? 'Are you sure you want to delete all summaries for "$workoutName"?'
+                : 'Are you sure you want to delete this workout summary?',
+          ),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -55,7 +71,20 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
     );
   }
 
-  Map<String, List<WorkoutSummary>> _groupSummaries(List<WorkoutSummary> summaries) {
+  void _scrollToSummary(WorkoutSummary summary) {
+    final key = _summaryKeys[summary.key];
+    if (key != null && key.currentContext != null) {
+      Scrollable.ensureVisible(
+        key.currentContext!,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  Map<String, List<WorkoutSummary>> _groupSummaries(
+    List<WorkoutSummary> summaries,
+  ) {
     final Map<String, List<WorkoutSummary>> grouped = {};
     for (final summary in summaries) {
       if (grouped.containsKey(summary.workoutName)) {
@@ -72,8 +101,9 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
   }
 
   Widget _buildSummaryDetails(WorkoutSummary summary) {
+    final key = _summaryKeys.putIfAbsent(summary.key, () => GlobalKey());
     return Dismissible(
-      key: ValueKey(summary.key),
+      key: key,
       direction: DismissDirection.endToStart,
       background: Container(
         color: Colors.red,
@@ -81,11 +111,16 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: const Icon(Icons.delete, color: Colors.white),
       ),
-      confirmDismiss: (direction) => _confirmDismiss(context, summary.workoutName),
+      confirmDismiss: (direction) =>
+          _confirmDismiss(context, summary.workoutName),
       onDismissed: (direction) {
         _workoutSummaryRepository.deleteWorkoutSummary(summary.key);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Workout summary for "${summary.workoutName}" deleted')),
+          SnackBar(
+            content: Text(
+              'Workout summary for "${summary.workoutName}" deleted',
+            ),
+          ),
         );
       },
       child: Card(
@@ -95,19 +130,28 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Date: ${DateFormat('yyyy-MM-dd HH:mm').format(summary.date)}', style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                'Date: ${DateFormat('yyyy-MM-dd HH:mm').format(summary.date)}',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               const SizedBox(height: 8),
               Text('Duration: ${_formatDuration(summary.totalDuration)}'),
-              if (summary.workoutLevel > 1) Text('Level: ${summary.workoutLevel}'),
+              if (summary.workoutLevel > 1)
+                Text('Level: ${summary.workoutLevel}'),
               if (summary.isSurvivalMode) const Text('Mode: Survival'),
-              Text('Sets Order: ${summary.workoutType.toString().split('.').last == 'alternating' ? 'Alternating' : 'Sequential'}'),
+              Text(
+                'Sets Order: ${summary.workoutType.toString().split('.').last == 'alternating' ? 'Alternating' : 'Sequential'}',
+              ),
               Text('Total Sets Performed: ${summary.totalSets}'),
-              if (summary.wasStoppedPrematurely) const Text('Status: Stopped Early'),
+              if (summary.wasStoppedPrematurely)
+                const Text('Status: Stopped Early'),
               const SizedBox(height: 16),
               ExpansionTile(
                 title: Text(
                   'Workout Plan Performed',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 subtitle: Text('Tap to see details'),
                 collapsedBackgroundColor: Colors.blue[50],
@@ -115,18 +159,23 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
                 iconColor: Colors.blue[800],
                 collapsedIconColor: Colors.blue[800],
                 tilePadding: const EdgeInsets.symmetric(horizontal: 16.0),
-                childrenPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                childrenPadding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8.0,
+                ),
                 children: summary.performedSets.map((workoutSet) {
                   final content = workoutSet.isRestBlock
                       ? '- Rest Block (${workoutSet.restBlockDuration}s)'
                       : workoutSet.isRestSet
-                          ? '- Rest (after ${workoutSet.exercise.name} Set ${workoutSet.setNumber}) Duration: ${workoutSet.exercise.restTimeInSeconds ?? 0}s'
-                          : '- ${workoutSet.exercise.name} (Set ${workoutSet.setNumber} / ${workoutSet.exercise.sets})'
+                      ? '- Rest (after ${workoutSet.exercise.name} Set ${workoutSet.setNumber}) Duration: ${workoutSet.exercise.restTimeInSeconds ?? 0}s'
+                      : '- ${workoutSet.exercise.name} (Set ${workoutSet.setNumber} / ${workoutSet.exercise.sets})'
                             '${workoutSet.exercise.reps != null ? ', Reps: ${workoutSet.exercise.reps}' : ''}'
                             ' | Work: ${workoutSet.exercise.workTimeInSeconds}s';
-                  
+
                   final style = workoutSet.isRestBlock || workoutSet.isRestSet
-                      ? Theme.of(context).textTheme.bodyLarge?.copyWith(fontStyle: FontStyle.italic)
+                      ? Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontStyle: FontStyle.italic,
+                        )
                       : Theme.of(context).textTheme.bodyLarge;
 
                   return Padding(
@@ -147,6 +196,19 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Workout Summaries'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.calendar_today),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const WorkoutCalendarScreen(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: ValueListenableBuilder(
         valueListenable: _workoutSummaryRepository.listenable,
@@ -158,49 +220,53 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
                 child: Text(
                   'No workout summaries yet. Complete a workout to see it here!',
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.grey),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.headlineSmall?.copyWith(color: Colors.grey),
                 ),
               ),
             );
           }
-          final List<WorkoutSummary> summaries = box.values.toList().cast<WorkoutSummary>();
+          final List<WorkoutSummary> summaries = box.values
+              .toList()
+              .cast<WorkoutSummary>();
           final groupedSummaries = _groupSummaries(summaries);
           final sortedWorkoutNames = groupedSummaries.keys.toList()
-            ..sort((a, b) => groupedSummaries[b]!.first.date.compareTo(groupedSummaries[a]!.first.date));
+            ..sort(
+              (a, b) => groupedSummaries[b]!.first.date.compareTo(
+                groupedSummaries[a]!.first.date,
+              ),
+            );
 
           return ListView.builder(
+            controller: _scrollController,
             itemCount: sortedWorkoutNames.length,
             itemBuilder: (context, index) {
               final workoutName = sortedWorkoutNames[index];
               final workoutSummaries = groupedSummaries[workoutName]!;
-              return Dismissible(
-                key: ValueKey(workoutName),
-                direction: DismissDirection.endToStart,
-                background: Container(
-                  color: Colors.red,
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: const Icon(Icons.delete, color: Colors.white),
-                ),
-                confirmDismiss: (direction) => _confirmDismiss(context, workoutName, deleteAll: true),
-                onDismissed: (direction) {
-                  for (final summary in workoutSummaries) {
-                    _workoutSummaryRepository.deleteWorkoutSummary(summary.key);
-                  }
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('All summaries for "$workoutName" deleted')),
-                  );
-                },
-                child: Card(
-                  margin: const EdgeInsets.all(8.0),
-                  child: ExpansionTile(
-                    title: Text(
-                      workoutName,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text('${workoutSummaries.length} workout(s)'),
-                    children: workoutSummaries.map(_buildSummaryDetails).toList(),
+              return Card(
+                margin: const EdgeInsets.all(8.0),
+                child: ExpansionTile(
+                  key: GlobalKey(), // Add a key to preserve state
+                  initiallyExpanded: workoutName == _expandedWorkoutName,
+                  onExpansionChanged: (isExpanded) {
+                    setState(() {
+                      if (isExpanded) {
+                        _expandedWorkoutName = workoutName;
+                      } else if (_expandedWorkoutName == workoutName) {
+                        _expandedWorkoutName = null;
+                      }
+                    });
+                  },
+                  title: Text(
+                    workoutName,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
+                  subtitle: Text('${workoutSummaries.length} workout(s)'),
+                  children:
+                      workoutSummaries.map(_buildSummaryDetails).toList(),
                 ),
               );
             },
