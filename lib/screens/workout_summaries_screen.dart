@@ -104,31 +104,37 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
               Text('Total Sets Performed: ${summary.totalSets}'),
               if (summary.wasStoppedPrematurely) const Text('Status: Stopped Early'),
               const SizedBox(height: 16),
-              Text(
-                'Workout Plan Performed:',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ExpansionTile(
+                title: Text(
+                  'Workout Plan Performed',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text('Tap to see details'),
+                collapsedBackgroundColor: Colors.blue[50],
+                backgroundColor: Colors.blue[100],
+                iconColor: Colors.blue[800],
+                collapsedIconColor: Colors.blue[800],
+                tilePadding: const EdgeInsets.symmetric(horizontal: 16.0),
+                childrenPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                children: summary.performedSets.map((workoutSet) {
+                  final content = workoutSet.isRestBlock
+                      ? '- Rest Block (${workoutSet.restBlockDuration}s)'
+                      : workoutSet.isRestSet
+                          ? '- Rest (after ${workoutSet.exercise.name} Set ${workoutSet.setNumber}) Duration: ${workoutSet.exercise.restTimeInSeconds ?? 0}s'
+                          : '- ${workoutSet.exercise.name} (Set ${workoutSet.setNumber} / ${workoutSet.exercise.sets})'
+                            '${workoutSet.exercise.reps != null ? ', Reps: ${workoutSet.exercise.reps}' : ''}'
+                            ' | Work: ${workoutSet.exercise.workTimeInSeconds}s';
+                  
+                  final style = workoutSet.isRestBlock || workoutSet.isRestSet
+                      ? Theme.of(context).textTheme.bodyLarge?.copyWith(fontStyle: FontStyle.italic)
+                      : Theme.of(context).textTheme.bodyLarge;
+
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 16.0, bottom: 8.0),
+                    child: Text(content, style: style),
+                  );
+                }).toList(),
               ),
-              const SizedBox(height: 8),
-              ...summary.performedSets.map((workoutSet) {
-                if (workoutSet.isRestBlock) {
-                  return Text(
-                    '- Rest Block (${workoutSet.restBlockDuration}s)',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontStyle: FontStyle.italic),
-                  );
-                } else if (workoutSet.isRestSet) {
-                  return Text(
-                    '- Rest (after ${workoutSet.exercise.name} Set ${workoutSet.setNumber}) Duration: ${workoutSet.exercise.restTimeInSeconds ?? 0}s',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontStyle: FontStyle.italic),
-                  );
-                } else {
-                  return Text(
-                    '- ${workoutSet.exercise.name} (Set ${workoutSet.setNumber} / ${workoutSet.exercise.sets})'
-                    '${workoutSet.exercise.reps != null ? ', Reps: ${workoutSet.exercise.reps}' : ''}'
-                    ' | Work: ${workoutSet.exercise.workTimeInSeconds}s',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  );
-                }
-              }),
             ],
           ),
         ),

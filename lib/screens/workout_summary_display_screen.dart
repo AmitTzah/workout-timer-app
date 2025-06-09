@@ -69,44 +69,48 @@ class WorkoutSummaryDisplayScreen extends StatelessWidget {
               _buildSummaryRow(context, 'Sets Order:', summary.workoutType.toString().split('.').last == 'alternating' ? 'Alternating' : 'Sequential'),
               _buildSummaryRow(context, 'Total Sets Performed:', summary.totalSets.toString()),
               const SizedBox(height: 20),
-              Text(
-                'Workout Plan Performed:',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              ListView.builder(
-                shrinkWrap: true, // Important for ListView inside SingleChildScrollView
-                physics: const NeverScrollableScrollPhysics(), // Disable ListView's own scrolling
-                itemCount: summary.performedSets.length,
-                itemBuilder: (context, index) {
-                  final workoutSet = summary.performedSets[index];
-                  if (workoutSet.isRestBlock) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4.0),
-                      child: Text(
-                        '- Rest Block (${workoutSet.restBlockDuration}s)',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontStyle: FontStyle.italic),
-                      ),
-                    );
-                  } else if (workoutSet.isRestSet) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4.0),
-                      child: Text(
-                        '- Rest (after ${workoutSet.exercise.name} Set ${workoutSet.setNumber}) Duration: ${workoutSet.exercise.restTimeInSeconds ?? 0}s',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontStyle: FontStyle.italic),
-                      ),
-                    );
-                  } else {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4.0),
-                      child: Text(
-                        '- ${workoutSet.exercise.name} (Set ${workoutSet.setNumber} / ${workoutSet.exercise.sets})'
-                        '${workoutSet.exercise.reps != null ? ', Reps: ${workoutSet.exercise.reps}' : ''}'
-                        ' | Work: ${workoutSet.exercise.workTimeInSeconds}s',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                    );
-                  }
-                },
+              ExpansionTile(
+                title: Text(
+                  'Workout Plan Performed:',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                children: [
+                  ListView.builder(
+                    shrinkWrap: true, // Important for ListView inside SingleChildScrollView
+                    physics: const NeverScrollableScrollPhysics(), // Disable ListView's own scrolling
+                    itemCount: summary.performedSets.length,
+                    itemBuilder: (context, index) {
+                      final workoutSet = summary.performedSets[index];
+                      if (workoutSet.isRestBlock) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
+                          child: Text(
+                            '- Rest Block (${workoutSet.restBlockDuration}s)',
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontStyle: FontStyle.italic),
+                          ),
+                        );
+                      } else if (workoutSet.isRestSet) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
+                          child: Text(
+                            '- Rest (after ${workoutSet.exercise.name} Set ${workoutSet.setNumber}) Duration: ${workoutSet.exercise.restTimeInSeconds ?? 0}s',
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontStyle: FontStyle.italic),
+                          ),
+                        );
+                      } else {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
+                          child: Text(
+                            '- ${workoutSet.exercise.name} (Set ${workoutSet.setNumber} / ${workoutSet.exercise.sets})'
+                            '${workoutSet.exercise.reps != null ? ', Reps: ${workoutSet.exercise.reps}' : ''}'
+                            ' | Work: ${workoutSet.exercise.workTimeInSeconds}s',
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                ],
               ),
               const SizedBox(height: 20),
               Padding(
