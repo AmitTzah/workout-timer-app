@@ -145,6 +145,13 @@ class WorkoutCalendarScreenState extends State<WorkoutCalendarScreen> {
     );
   }
 
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return '${twoDigits(duration.inHours)}:$minutes:$seconds';
+  }
+
   Widget _buildEventList() {
     final selectedEvents = _getEventsForDay(_selectedDay!);
     if (selectedEvents.isEmpty) {
@@ -161,7 +168,7 @@ class WorkoutCalendarScreenState extends State<WorkoutCalendarScreen> {
           child: ListTile(
             title: Text(summary.workoutName),
             subtitle: Text(
-                '${DateFormat.yMMMd().add_jm().format(summary.date)} - ${summary.totalDuration.inMinutes} min'),
+                '${DateFormat.yMMMd().add_jm().format(summary.date)} - ${_formatDuration(summary.totalDuration)}'),
             onTap: () {
               Navigator.push(
                 context,
