@@ -1,14 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'dart:async';
-import 'package:exercise_timer_app/models/user_workout.dart';
-import 'package:exercise_timer_app/services/audio_service.dart';
-import 'package:exercise_timer_app/models/workout_summary.dart';
-import 'package:exercise_timer_app/models/workout_set.dart';
+import 'package:workout_timer_app/models/user_workout.dart';
+import 'package:workout_timer_app/services/audio_service.dart';
+import 'package:workout_timer_app/models/workout_summary.dart';
+import 'package:workout_timer_app/models/workout_set.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
-import 'package:exercise_timer_app/services/workout_logic_service.dart';
-import 'package:exercise_timer_app/models/workout_completion_details.dart';
+import 'package:workout_timer_app/services/workout_logic_service.dart';
+import 'package:workout_timer_app/models/workout_completion_details.dart';
 // Import new workout_item
-import 'package:exercise_timer_app/models/workout_type.dart';
+import 'package:workout_timer_app/models/workout_type.dart';
 
 class WorkoutController extends ChangeNotifier {
   final UserWorkout _workout;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
-import 'package:exercise_timer_app/models/workout_set.dart';
+import 'package:workout_timer_app/models/workout_set.dart';
 // Import UserWorkout for restDurationInSeconds
 
 class WorkoutSetList extends StatelessWidget {

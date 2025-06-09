@@ -1,6 +1,6 @@
 import 'package:hive/hive.dart';
-import 'package:exercise_timer_app/models/exercise.dart';
-import 'package:exercise_timer_app/models/workout_item.dart';
+import 'package:workout_timer_app/models/exercise.dart';
+import 'package:workout_timer_app/models/workout_item.dart';
 
 part 'alternating_group_item.g.dart';
 

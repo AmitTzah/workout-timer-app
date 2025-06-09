@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:provider/provider.dart';
-import 'package:exercise_timer_app/models/exercise.dart';
-import 'package:exercise_timer_app/models/user_workout.dart';
-import 'package:exercise_timer_app/repositories/user_workout_repository.dart';
-import 'package:exercise_timer_app/widgets/workout_name_text_field.dart';
-import 'package:exercise_timer_app/widgets/exercise_list.dart';
-import 'package:exercise_timer_app/widgets/workout_duration_display.dart';
-import 'package:exercise_timer_app/widgets/save_workout_button.dart';
-import 'package:exercise_timer_app/models/workout_item.dart';
-import 'package:exercise_timer_app/models/workout_type.dart';
-import 'package:exercise_timer_app/widgets/add_exercise_dialog.dart';
-import 'package:exercise_timer_app/models/alternating_group_item.dart'; // Import new item
-import 'package:exercise_timer_app/widgets/alternating_group_list.dart'; // Import new widget
-import 'package:exercise_timer_app/models/rest_block_item.dart'; // Import RestBlockItem
+import 'package:workout_timer_app/models/exercise.dart';
+import 'package:workout_timer_app/models/user_workout.dart';
+import 'package:workout_timer_app/repositories/user_workout_repository.dart';
+import 'package:workout_timer_app/widgets/workout_name_text_field.dart';
+import 'package:workout_timer_app/widgets/exercise_list.dart';
+import 'package:workout_timer_app/widgets/workout_duration_display.dart';
+import 'package:workout_timer_app/widgets/save_workout_button.dart';
+import 'package:workout_timer_app/models/workout_item.dart';
+import 'package:workout_timer_app/models/workout_type.dart';
+import 'package:workout_timer_app/widgets/add_exercise_dialog.dart';
+import 'package:workout_timer_app/models/alternating_group_item.dart'; // Import new item
+import 'package:workout_timer_app/widgets/alternating_group_list.dart'; // Import new widget
+import 'package:workout_timer_app/models/rest_block_item.dart'; // Import RestBlockItem
 
 class DefineWorkoutScreen extends StatefulWidget {
   final UserWorkout? workout;

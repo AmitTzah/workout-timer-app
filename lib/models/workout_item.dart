@@ -1,5 +1,5 @@
 import 'package:hive/hive.dart';
-import 'package:exercise_timer_app/models/exercise.dart';
+import 'package:workout_timer_app/models/exercise.dart';
 
 part 'workout_item.g.dart';
 

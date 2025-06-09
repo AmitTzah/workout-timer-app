@@ -1,13 +1,13 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:exercise_timer_app/models/exercise.dart';
-import 'package:exercise_timer_app/models/workout_summary.dart';
-import 'package:exercise_timer_app/models/goal.dart';
-import 'package:exercise_timer_app/models/user_workout.dart';
-import 'package:exercise_timer_app/models/workout_set.dart';
-import 'package:exercise_timer_app/models/workout_item.dart'; // Import WorkoutItem and its concrete types
-import 'package:exercise_timer_app/models/workout_type.dart'; // Import WorkoutType
-import 'package:exercise_timer_app/models/alternating_group_item.dart'; // Import AlternatingGroupItem
-import 'package:exercise_timer_app/models/rest_block_item.dart'; // Import RestBlockItem
+import 'package:workout_timer_app/models/exercise.dart';
+import 'package:workout_timer_app/models/workout_summary.dart';
+import 'package:workout_timer_app/models/goal.dart';
+import 'package:workout_timer_app/models/user_workout.dart';
+import 'package:workout_timer_app/models/workout_set.dart';
+import 'package:workout_timer_app/models/workout_item.dart'; // Import WorkoutItem and its concrete types
+import 'package:workout_timer_app/models/workout_type.dart'; // Import WorkoutType
+import 'package:workout_timer_app/models/alternating_group_item.dart'; // Import AlternatingGroupItem
+import 'package:workout_timer_app/models/rest_block_item.dart'; // Import RestBlockItem
 
 class DatabaseService {
   static bool _isInitialized = false;

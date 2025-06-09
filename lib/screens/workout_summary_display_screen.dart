@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; // Import provider
-import 'package:exercise_timer_app/models/workout_summary.dart';
-import 'package:exercise_timer_app/repositories/workout_summary_repository.dart'; // Use the new repository
+import 'package:workout_timer_app/models/workout_summary.dart';
+import 'package:workout_timer_app/repositories/workout_summary_repository.dart'; // Use the new repository
 import 'package:intl/intl.dart'; // For date formatting
 
 class WorkoutSummaryDisplayScreen extends StatelessWidget {

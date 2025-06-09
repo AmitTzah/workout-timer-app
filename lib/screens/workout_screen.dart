@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:exercise_timer_app/models/user_workout.dart';
-import 'package:exercise_timer_app/services/audio_service.dart';
-import 'package:exercise_timer_app/screens/workout_summary_display_screen.dart';
-import 'package:exercise_timer_app/controllers/workout_controller.dart';
-import 'package:exercise_timer_app/models/workout_summary.dart';
-import 'package:exercise_timer_app/models/workout_type.dart';
-import 'package:exercise_timer_app/widgets/workout_timer_header.dart';
-import 'package:exercise_timer_app/widgets/workout_set_list.dart';
-import 'package:exercise_timer_app/widgets/workout_controls.dart';
+import 'package:workout_timer_app/models/user_workout.dart';
+import 'package:workout_timer_app/services/audio_service.dart';
+import 'package:workout_timer_app/screens/workout_summary_display_screen.dart';
+import 'package:workout_timer_app/controllers/workout_controller.dart';
+import 'package:workout_timer_app/models/workout_summary.dart';
+import 'package:workout_timer_app/models/workout_type.dart';
+import 'package:workout_timer_app/widgets/workout_timer_header.dart';
+import 'package:workout_timer_app/widgets/workout_set_list.dart';
+import 'package:workout_timer_app/widgets/workout_controls.dart';
 
 class WorkoutScreen extends StatefulWidget {
   final UserWorkout workout;

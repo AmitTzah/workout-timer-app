@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:exercise_timer_app/models/user_workout.dart';
-import 'package:exercise_timer_app/models/workout_type.dart';
-import 'package:exercise_timer_app/models/workout_item.dart';
-import 'package:exercise_timer_app/models/alternating_group_item.dart';
+import 'package:workout_timer_app/models/user_workout.dart';
+import 'package:workout_timer_app/models/workout_type.dart';
+import 'package:workout_timer_app/models/workout_item.dart';
+import 'package:workout_timer_app/models/alternating_group_item.dart';
 
 class WorkoutCardHeader extends StatelessWidget {
   final UserWorkout workout;

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 // Import Hive
-import 'package:exercise_timer_app/services/database_service.dart';
-import 'package:exercise_timer_app/screens/home_screen.dart';
-import 'package:exercise_timer_app/repositories/user_workout_repository.dart';
-import 'package:exercise_timer_app/repositories/workout_summary_repository.dart';
-import 'package:exercise_timer_app/services/audio_service.dart';
+import 'package:workout_timer_app/services/database_service.dart';
+import 'package:workout_timer_app/screens/home_screen.dart';
+import 'package:workout_timer_app/repositories/user_workout_repository.dart';
+import 'package:workout_timer_app/repositories/workout_summary_repository.dart';
+import 'package:workout_timer_app/services/audio_service.dart';
 // Import WorkoutType
 
 void main() async {
@@ -34,18 +34,18 @@ void main() async {
           dispose: (_, audioService) => audioService.dispose(),
         ),
       ],
-      child: const ExerciseTimerApp(),
+      child: const WorkoutTimerApp(),
     ),
   );
 }
 
-class ExerciseTimerApp extends StatelessWidget {
-  const ExerciseTimerApp({super.key});
+class WorkoutTimerApp extends StatelessWidget {
+  const WorkoutTimerApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Exercise Timer',
+      title: 'Workout Timer',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,

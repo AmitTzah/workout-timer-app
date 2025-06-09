@@ -1,4 +1,4 @@
-import 'package:exercise_timer_app/models/workout_set.dart';
+import 'package:workout_timer_app/models/workout_set.dart';
 
 class WorkoutCompletionDetails {
   final bool wasStoppedPrematurely;

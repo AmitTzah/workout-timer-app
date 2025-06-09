@@ -1,6 +1,6 @@
 import 'package:hive_flutter/hive_flutter.dart'; // For Box
 import 'package:flutter/foundation.dart'; // For ValueListenable
-import 'package:exercise_timer_app/models/workout_summary.dart';
+import 'package:workout_timer_app/models/workout_summary.dart';
 
 class WorkoutSummaryRepository {
   final Box<WorkoutSummary> _workoutSummariesBox;

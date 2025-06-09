@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:exercise_timer_app/models/workout_item.dart';
-import 'package:exercise_timer_app/models/rest_block_item.dart';
-import 'package:exercise_timer_app/models/alternating_group_item.dart';
-import 'package:exercise_timer_app/models/exercise.dart';
+import 'package:workout_timer_app/models/workout_item.dart';
+import 'package:workout_timer_app/models/rest_block_item.dart';
+import 'package:workout_timer_app/models/alternating_group_item.dart';
+import 'package:workout_timer_app/models/exercise.dart';
 
 class WorkoutPlan extends StatelessWidget {
   final List<WorkoutItem> items;

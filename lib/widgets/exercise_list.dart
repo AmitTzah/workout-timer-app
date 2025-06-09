@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:exercise_timer_app/models/workout_item.dart'; // Import WorkoutItem
-import 'package:exercise_timer_app/models/rest_block_item.dart'; // Import RestBlockItem
+import 'package:workout_timer_app/models/workout_item.dart'; // Import WorkoutItem
+import 'package:workout_timer_app/models/rest_block_item.dart'; // Import RestBlockItem
 // Import Exercise
 
 class ExerciseList extends StatelessWidget {

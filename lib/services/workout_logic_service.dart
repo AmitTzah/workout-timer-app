@@ -1,14 +1,14 @@
-import 'package:exercise_timer_app/models/user_workout.dart';
-import 'package:exercise_timer_app/models/exercise.dart'; // Still needed for Exercise object within WorkoutSet
-import 'package:exercise_timer_app/models/workout_set.dart';
+import 'package:workout_timer_app/models/user_workout.dart';
+import 'package:workout_timer_app/models/exercise.dart'; // Still needed for Exercise object within WorkoutSet
+import 'package:workout_timer_app/models/workout_set.dart';
 import 'package:uuid/uuid.dart'; // Import Uuid
-import 'package:exercise_timer_app/models/workout_item.dart'; // New: Import WorkoutItem
-import 'package:exercise_timer_app/models/alternating_group_item.dart'; // Import AlternatingGroupItem
-import 'package:exercise_timer_app/models/rest_block_item.dart'; // Import RestBlockItem
+import 'package:workout_timer_app/models/workout_item.dart'; // New: Import WorkoutItem
+import 'package:workout_timer_app/models/alternating_group_item.dart'; // Import AlternatingGroupItem
+import 'package:workout_timer_app/models/rest_block_item.dart'; // Import RestBlockItem
 
 /// Manages the core logic of workout structure and progression.
 /// This service is independent of UI or specific timer implementations.
-import 'package:exercise_timer_app/models/workout_type.dart';
+import 'package:workout_timer_app/models/workout_type.dart';
 
 class WorkoutLogicService {
   final UserWorkout _baseWorkout;

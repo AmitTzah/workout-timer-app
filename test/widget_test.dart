@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:exercise_timer_app/main.dart';
-import 'package:exercise_timer_app/services/database_service.dart';
+import 'package:workout_timer_app/main.dart';
+import 'package:workout_timer_app/services/database_service.dart';
 import 'package:hive_flutter/hive_flutter.dart'; // Import Hive for testing
 
 void main() {
@@ -17,9 +17,9 @@ void main() {
 
   testWidgets('ExerciseTimerApp builds and displays SetupScreen', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const ExerciseTimerApp());
+    await tester.pumpWidget(const WorkoutTimerApp());
 
-    // Verify that SetupScreen is displayed.
-    expect(find.text('Exercise Timer Setup'), findsOneWidget);
+    // Verify that HomeScreen is displayed.
+    expect(find.text('My Workouts'), findsOneWidget);
   });
 }

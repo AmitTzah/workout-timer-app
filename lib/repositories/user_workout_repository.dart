@@ -1,5 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart'; // For ValueListenable and Box
-import 'package:exercise_timer_app/models/user_workout.dart';
+import 'package:workout_timer_app/models/user_workout.dart';
 import 'package:flutter/foundation.dart'; // For ValueListenable
 
 class UserWorkoutRepository {

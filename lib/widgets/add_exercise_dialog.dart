@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart'; // Import Uuid
-import 'package:exercise_timer_app/models/exercise.dart';
+import 'package:workout_timer_app/models/exercise.dart';
 
 class AddExerciseDialog extends StatefulWidget {
   final List<String> predefinedExercises;
