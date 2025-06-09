@@ -8,14 +8,17 @@ import 'package:workout_timer_app/models/rest_block_item.dart';
 class AlternatingGroupList extends StatefulWidget {
   final List<WorkoutItem> workoutItems;
   final Function(int oldIndex, int newIndex) onReorderItems;
-  final Function(String groupId, int oldExerciseIndex, int newExerciseIndex) onReorderExercisesInGroup;
+  final Function(String groupId, int oldExerciseIndex, int newExerciseIndex)
+  onReorderExercisesInGroup;
   final Function(String groupId, Exercise exercise) onAddExerciseToGroup;
   final Function(String groupId, int exerciseIndex) onRemoveExerciseFromGroup;
-  final Function(String groupId, int exerciseIndex, Exercise updatedExercise) onEditExerciseInGroup;
+  final Function(String groupId, int exerciseIndex, Exercise updatedExercise)
+  onEditExerciseInGroup;
   final Function(String id) onRemoveItem; // Changed to onRemoveItem with ID
   final Function() onAddGroup;
   final List<String> predefinedExercises;
-  final Function(String id, String newName, int newCycles, int? newGroupRest) onEditGroup; // New callback for editing group
+  final Function(String id, String newName, int newCycles, int? newGroupRest)
+  onEditGroup; // New callback for editing group
 
   const AlternatingGroupList({
     super.key,
@@ -52,7 +55,10 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
               final group = item;
               return Card(
                 key: ValueKey(group.id),
-                margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0), // Add horizontal margin
+                margin: const EdgeInsets.symmetric(
+                  vertical: 8.0,
+                  horizontal: 4.0,
+                ), // Add horizontal margin
                 elevation: 4.0, // Add elevation for a raised effect
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -66,11 +72,24 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
                             onTap: () async {
                               await _showEditGroupNameDialog(context, group);
                             },
-                            splashColor: Theme.of(context).colorScheme.primary.withAlpha((255 * 0.3).round()), // Increased opacity
-                            highlightColor: Theme.of(context).colorScheme.primary.withAlpha((255 * 0.15).round()), // Increased opacity
-                            borderRadius: BorderRadius.circular(8.0), // Add border radius
+                            splashColor: Theme.of(context).colorScheme.primary
+                                .withAlpha(
+                                  (255 * 0.3).round(),
+                                ), // Increased opacity
+                            highlightColor: Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withAlpha(
+                                  (255 * 0.15).round(),
+                                ), // Increased opacity
+                            borderRadius: BorderRadius.circular(
+                              8.0,
+                            ), // Add border radius
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0), // Add some padding for better tap area
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 4.0,
+                                horizontal: 8.0,
+                              ), // Add some padding for better tap area
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -103,57 +122,87 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround, // Reverted to spaceAround to distribute the two centered columns
+                          mainAxisAlignment: MainAxisAlignment
+                              .spaceAround, // Reverted to spaceAround to distribute the two centered columns
                           children: [
-                            Center( // Explicitly center the Cycles column
+                            Center(
+                              // Explicitly center the Cycles column
                               child: InkWell(
                                 onTap: () async {
                                   await _showEditCyclesDialog(context, group);
                                 },
-                                splashColor: Theme.of(context).colorScheme.primary.withAlpha((255 * 0.3).round()),
-                                highlightColor: Theme.of(context).colorScheme.primary.withAlpha((255 * 0.15).round()),
+                                splashColor: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withAlpha((255 * 0.3).round()),
+                                highlightColor: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withAlpha((255 * 0.15).round()),
                                 borderRadius: BorderRadius.circular(8.0),
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 4.0,
+                                    horizontal: 8.0,
+                                  ),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     children: [
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Text(
-                                          'Cycles',
-                                          style: TextStyle(fontWeight: FontWeight.bold),
-                                        ),
-                                        const SizedBox(width: 4),
-                                        const Icon(Icons.edit, size: 16),
-                                      ],
-                                    ),
-                                    Text('${group.cycles}'),
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Text(
+                                            'Cycles',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          const Icon(Icons.edit, size: 16),
+                                        ],
+                                      ),
+                                      Text('${group.cycles}'),
                                     ],
                                   ),
                                 ),
                               ),
                             ),
-                            Center( // Explicitly center the Rest Between Cycles column
+                            Center(
+                              // Explicitly center the Rest Between Cycles column
                               child: InkWell(
                                 onTap: () async {
-                                  await _showEditGroupRestDialog(context, group);
+                                  await _showEditGroupRestDialog(
+                                    context,
+                                    group,
+                                  );
                                 },
-                                splashColor: Theme.of(context).colorScheme.primary.withAlpha((255 * 0.3).round()),
-                                highlightColor: Theme.of(context).colorScheme.primary.withAlpha((255 * 0.15).round()),
+                                splashColor: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withAlpha((255 * 0.3).round()),
+                                highlightColor: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withAlpha((255 * 0.15).round()),
                                 borderRadius: BorderRadius.circular(8.0),
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 4.0,
+                                    horizontal: 8.0,
+                                  ),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     children: [
                                       Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           const Text(
                                             'Rest Between Cycles',
-                                            style: TextStyle(fontWeight: FontWeight.bold),
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
                                           const SizedBox(width: 4),
                                           const Icon(Icons.edit, size: 16),
@@ -173,33 +222,60 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: group.exercises.length,
                         onReorder: (oldExerciseIndex, newExerciseIndex) {
-                          widget.onReorderExercisesInGroup(group.id, oldExerciseIndex, newExerciseIndex);
+                          widget.onReorderExercisesInGroup(
+                            group.id,
+                            oldExerciseIndex,
+                            newExerciseIndex,
+                          );
                         },
                         itemBuilder: (context, exerciseIndex) {
                           final exercise = group.exercises[exerciseIndex];
-                          return Card( // Wrap ListTile in Card for raised effect
-                            key: ValueKey(exercise.id), // Key needs to be on the Card for ReorderableListView
-                            margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0), // Add horizontal margin
+                          return Card(
+                            // Wrap ListTile in Card for raised effect
+                            key: ValueKey(
+                              exercise.id,
+                            ), // Key needs to be on the Card for ReorderableListView
+                            margin: const EdgeInsets.symmetric(
+                              vertical: 4.0,
+                              horizontal: 8.0,
+                            ), // Add horizontal margin
                             elevation: 2.0, // Add elevation for a raised effect
                             child: ListTile(
-                              leading: const Icon(Icons.drag_handle), // Drag handle
+                              leading: const Icon(
+                                Icons.drag_handle,
+                              ), // Drag handle
                               title: Text(exercise.name),
-                              subtitle: Text('Work: ${exercise.workTimeInSeconds}s | Rest: ${exercise.restTimeInSeconds ?? 'N/A'}s'),
+                              subtitle: Text(
+                                '${exercise.reps != null ? 'Reps: ${exercise.reps} | ' : ''}'
+                                'Work: ${exercise.workTimeInSeconds}s | Rest: ${exercise.restTimeInSeconds ?? 'N/A'}s',
+                              ),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   IconButton(
                                     icon: const Icon(Icons.edit),
                                     onPressed: () async {
-                                      final Exercise? updatedExercise = await _showEditExerciseDialog(context, exercise);
+                                      final Exercise? updatedExercise =
+                                          await _showEditExerciseDialog(
+                                            context,
+                                            exercise,
+                                          );
                                       if (updatedExercise != null) {
-                                        widget.onEditExerciseInGroup(group.id, exerciseIndex, updatedExercise);
+                                        widget.onEditExerciseInGroup(
+                                          group.id,
+                                          exerciseIndex,
+                                          updatedExercise,
+                                        );
                                       }
                                     },
                                   ),
                                   IconButton(
                                     icon: const Icon(Icons.delete),
-                                    onPressed: () => widget.onRemoveExerciseFromGroup(group.id, exerciseIndex),
+                                    onPressed: () =>
+                                        widget.onRemoveExerciseFromGroup(
+                                          group.id,
+                                          exerciseIndex,
+                                        ),
                                   ),
                                 ],
                               ),
@@ -214,9 +290,13 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
                           icon: const Icon(Icons.add),
                           label: const Text('Add Exercise to Group'),
                           onPressed: () async {
-                            final Exercise? newExercise = await _showAddExerciseDialog(context);
+                            final Exercise? newExercise =
+                                await _showAddExerciseDialog(context);
                             if (newExercise != null) {
-                              widget.onAddExerciseToGroup(group.id, newExercise);
+                              widget.onAddExerciseToGroup(
+                                group.id,
+                                newExercise,
+                              );
                             }
                           },
                         ),
@@ -266,8 +346,11 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
 
   Future<Exercise?> _showAddExerciseDialog(BuildContext context) async {
     String? selectedExerciseName;
-    final TextEditingController workTimeController = TextEditingController(text: '30');
+    final TextEditingController workTimeController = TextEditingController(
+      text: '30',
+    );
     final TextEditingController restTimeController = TextEditingController();
+    final TextEditingController repsController = TextEditingController(); // New controller for reps
 
     return showDialog<Exercise>(
       context: context,
@@ -300,12 +383,23 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
                 TextField(
                   controller: workTimeController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'Work Time (seconds)'),
+                  decoration: const InputDecoration(
+                    labelText: 'Work Time (seconds)',
+                  ),
                 ),
                 TextField(
                   controller: restTimeController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'Rest Time (seconds, Optional)'),
+                  decoration: const InputDecoration(
+                    labelText: 'Rest Time (seconds, Optional)',
+                  ),
+                ),
+                TextField( // New TextField for reps
+                  controller: repsController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Reps (Optional)',
+                  ),
                 ),
               ],
             ),
@@ -320,16 +414,23 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
             ElevatedButton(
               child: const Text('Add'),
               onPressed: () {
-                final int? workTime = int.tryParse(workTimeController.text.trim());
-                final int? restTime = int.tryParse(restTimeController.text.trim());
+                final int? workTime = int.tryParse(
+                  workTimeController.text.trim(),
+                );
+                final int? restTime = int.tryParse(
+                  restTimeController.text.trim(),
+                );
+                final int? reps = int.tryParse(repsController.text.trim()); // Parse reps
 
-                if (selectedExerciseName != null && workTime != null && workTime > 0) {
+                if (selectedExerciseName != null &&
+                    workTime != null &&
+                    workTime > 0) {
                   Navigator.of(context).pop(
                     Exercise(
                       id: const Uuid().v4(),
                       name: selectedExerciseName!,
                       sets: 1,
-                      reps: null,
+                      reps: reps, // Pass reps to Exercise constructor
                       workTimeInSeconds: workTime,
                       restTimeInSeconds: restTime,
                     ),
@@ -349,10 +450,20 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
     );
   }
 
-  Future<Exercise?> _showEditExerciseDialog(BuildContext context, Exercise currentExercise) async {
+  Future<Exercise?> _showEditExerciseDialog(
+    BuildContext context,
+    Exercise currentExercise,
+  ) async {
     String? selectedExerciseName = currentExercise.name;
-    final TextEditingController workTimeController = TextEditingController(text: currentExercise.workTimeInSeconds.toString());
-    final TextEditingController restTimeController = TextEditingController(text: currentExercise.restTimeInSeconds?.toString() ?? '');
+    final TextEditingController workTimeController = TextEditingController(
+      text: currentExercise.workTimeInSeconds.toString(),
+    );
+    final TextEditingController restTimeController = TextEditingController(
+      text: currentExercise.restTimeInSeconds?.toString() ?? '',
+    );
+    final TextEditingController repsController = TextEditingController(
+      text: currentExercise.reps?.toString() ?? '',
+    ); // New controller for reps
 
     return showDialog<Exercise>(
       context: context,
@@ -384,12 +495,23 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
               TextField(
                 controller: workTimeController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Work Time (seconds)'),
+                decoration: const InputDecoration(
+                  labelText: 'Work Time (seconds)',
+                ),
               ),
               TextField(
                 controller: restTimeController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Rest Time (seconds, Optional)'),
+                decoration: const InputDecoration(
+                  labelText: 'Rest Time (seconds, Optional)',
+                ),
+              ),
+              TextField( // New TextField for reps
+                controller: repsController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Reps (Optional)',
+                ),
               ),
             ],
           ),
@@ -403,16 +525,25 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
             ElevatedButton(
               child: const Text('Save'),
               onPressed: () {
-                final int? newWorkTime = int.tryParse(workTimeController.text.trim());
+                final int? newWorkTime = int.tryParse(
+                  workTimeController.text.trim(),
+                );
                 final String restText = restTimeController.text.trim();
-                final int? newRestTime = restText.isEmpty ? null : int.tryParse(restText);
+                final int? newRestTime = restText.isEmpty
+                    ? null
+                    : int.tryParse(restText);
+                final int? newReps = int.tryParse(repsController.text.trim()); // Parse reps
 
-                if (selectedExerciseName != null && newWorkTime != null && newWorkTime > 0) {
+                if (selectedExerciseName != null &&
+                    newWorkTime != null &&
+                    newWorkTime > 0) {
                   if (restText.isNotEmpty && newRestTime == null) {
                     // Handle invalid (non-empty, non-numeric) rest time input
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Please enter a valid rest time or leave it empty.'),
+                        content: Text(
+                          'Please enter a valid rest time or leave it empty.',
+                        ),
                       ),
                     );
                     return;
@@ -422,7 +553,7 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
                       id: currentExercise.id,
                       name: selectedExerciseName!,
                       sets: 1,
-                      reps: null,
+                      reps: newReps, // Pass newReps to Exercise constructor
                       workTimeInSeconds: newWorkTime,
                       restTimeInSeconds: newRestTime,
                       audioFileName: currentExercise.audioFileName,
@@ -431,7 +562,9 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Please enter valid work time and select an exercise name.'),
+                      content: Text(
+                        'Please enter valid work time and select an exercise name.',
+                      ),
                     ),
                   );
                 }
@@ -443,8 +576,13 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
     );
   }
 
-  Future<void> _showEditGroupNameDialog(BuildContext context, AlternatingGroupItem group) async {
-    final TextEditingController nameController = TextEditingController(text: group.name);
+  Future<void> _showEditGroupNameDialog(
+    BuildContext context,
+    AlternatingGroupItem group,
+  ) async {
+    final TextEditingController nameController = TextEditingController(
+      text: group.name,
+    );
 
     await showDialog(
       context: context,
@@ -467,7 +605,12 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
               onPressed: () {
                 final String newName = nameController.text.trim();
                 if (newName.isNotEmpty) {
-                  widget.onEditGroup(group.id, newName, group.cycles, group.groupRestInSeconds);
+                  widget.onEditGroup(
+                    group.id,
+                    newName,
+                    group.cycles,
+                    group.groupRestInSeconds,
+                  );
                   Navigator.of(context).pop();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -484,8 +627,13 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
     );
   }
 
-  Future<void> _showEditCyclesDialog(BuildContext context, AlternatingGroupItem group) async {
-    final TextEditingController cyclesController = TextEditingController(text: group.cycles.toString());
+  Future<void> _showEditCyclesDialog(
+    BuildContext context,
+    AlternatingGroupItem group,
+  ) async {
+    final TextEditingController cyclesController = TextEditingController(
+      text: group.cycles.toString(),
+    );
 
     await showDialog(
       context: context,
@@ -507,9 +655,16 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
             ElevatedButton(
               child: const Text('Save'),
               onPressed: () {
-                final int? newCycles = int.tryParse(cyclesController.text.trim());
+                final int? newCycles = int.tryParse(
+                  cyclesController.text.trim(),
+                );
                 if (newCycles != null && newCycles > 0) {
-                  widget.onEditGroup(group.id, group.name, newCycles, group.groupRestInSeconds);
+                  widget.onEditGroup(
+                    group.id,
+                    group.name,
+                    newCycles,
+                    group.groupRestInSeconds,
+                  );
                   Navigator.of(context).pop();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -526,8 +681,13 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
     );
   }
 
-  Future<void> _showEditGroupRestDialog(BuildContext context, AlternatingGroupItem group) async {
-    final TextEditingController groupRestController = TextEditingController(text: group.groupRestInSeconds?.toString() ?? '');
+  Future<void> _showEditGroupRestDialog(
+    BuildContext context,
+    AlternatingGroupItem group,
+  ) async {
+    final TextEditingController groupRestController = TextEditingController(
+      text: group.groupRestInSeconds?.toString() ?? '',
+    );
 
     await showDialog(
       context: context,
@@ -537,7 +697,9 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
           content: TextField(
             controller: groupRestController,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'Rest between cycles (seconds, Optional)'),
+            decoration: const InputDecoration(
+              labelText: 'Rest between cycles (seconds, Optional)',
+            ),
           ),
           actions: <Widget>[
             TextButton(
@@ -557,12 +719,19 @@ class _AlternatingGroupListState extends State<AlternatingGroupList> {
                 }
                 final int? newGroupRest = int.tryParse(restText);
                 if (newGroupRest != null && newGroupRest >= 0) {
-                  widget.onEditGroup(group.id, group.name, group.cycles, newGroupRest);
+                  widget.onEditGroup(
+                    group.id,
+                    group.name,
+                    group.cycles,
+                    newGroupRest,
+                  );
                   Navigator.of(context).pop();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Please enter a valid rest time (0 or greater).'),
+                      content: Text(
+                        'Please enter a valid rest time (0 or greater).',
+                      ),
                     ),
                   );
                 }
