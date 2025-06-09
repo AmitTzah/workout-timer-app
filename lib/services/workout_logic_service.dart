@@ -18,7 +18,8 @@ class WorkoutLogicService {
   late List<WorkoutSet> _exercisesToPerform;
   int _currentOverallSetIndex = 0;
   int _totalSetsCompleted = 0;
-  int _totalExerciseSets = 0;
+  int _totalSetsInPlan = 0; // Renamed for clarity (includes rests)
+  int _totalWorkSets = 0; // New: Only counts actual exercise sets
 
   // Public getters for previously private members
   dynamic get selectedLevelOrMode => _selectedLevelOrMode;
@@ -46,7 +47,8 @@ class WorkoutLogicService {
       ? _exercisesToPerform[_currentOverallSetIndex]
       : null;
 
-  int get totalSetsInPlan => _totalExerciseSets;
+  int get totalSetsInPlan => _totalSetsInPlan; // Use new name
+  int get totalWorkSets => _totalWorkSets; // New getter
 
   /// Calculates the total expected duration of the workout including rest periods.
   int get totalWorkoutDurationWithRests {
@@ -187,7 +189,8 @@ class WorkoutLogicService {
     }
 
     _exercisesToPerform = workoutPlan;
-    _totalExerciseSets = workoutPlan.where((set) => !set.isRestSet).length;
+    _totalSetsInPlan = workoutPlan.length; // Total sets including rests
+    _totalWorkSets = workoutPlan.where((set) => !set.isRestSet).length; // Only work sets
   }
 
   /// Advances to the next set in the workout plan.

@@ -55,35 +55,17 @@ class WorkoutController extends ChangeNotifier {
     }
 
     int cumulativeDurationOfCompletedSetsSec = 0;
-    for (int i = 0; i < _workoutLogicService.totalSetsCompleted; i++) {
-      if (i < _workoutLogicService.exercisesToPerform.length) {
-        final set = _workoutLogicService.exercisesToPerform[i];
-        if (set.isRestSet) {
-          if (set.isRestBlock) {
-            cumulativeDurationOfCompletedSetsSec += set.restBlockDuration!;
-          } else {
-            cumulativeDurationOfCompletedSetsSec +=
-                (set.exercise.restTimeInSeconds ?? 0);
-          }
+    for (int i = 0; i < _workoutLogicService.currentOverallSetIndex; i++) {
+      final set = _workoutLogicService.exercisesToPerform[i];
+      if (set.isRestSet) {
+        if (set.isRestBlock) {
+          cumulativeDurationOfCompletedSetsSec += set.restBlockDuration!;
         } else {
           cumulativeDurationOfCompletedSetsSec +=
-              set.exercise.workTimeInSeconds;
+              (set.exercise.restTimeInSeconds ?? 0);
         }
-      } else if (_workoutLogicService.isSurvivalMode) {
-        final set =
-            _workoutLogicService.exercisesToPerform[i %
-                _workoutLogicService.exercisesToPerform.length];
-        if (set.isRestSet) {
-          if (set.isRestBlock) {
-            cumulativeDurationOfCompletedSetsSec += set.restBlockDuration!;
-          } else {
-            cumulativeDurationOfCompletedSetsSec +=
-                (set.exercise.restTimeInSeconds ?? 0);
-          }
-        } else {
-          cumulativeDurationOfCompletedSetsSec +=
-              set.exercise.workTimeInSeconds;
-        }
+      } else {
+        cumulativeDurationOfCompletedSetsSec += set.exercise.workTimeInSeconds;
       }
     }
 
@@ -111,6 +93,7 @@ class WorkoutController extends ChangeNotifier {
 
   WorkoutSet? get currentWorkoutSet => _workoutLogicService.currentWorkoutSet;
   int get totalSets => _workoutLogicService.totalSetsInPlan;
+  int get totalWorkSets => _workoutLogicService.totalWorkSets; // New getter
 
   set onWorkoutFinished(Function(WorkoutSummary)? callback) {
     _onWorkoutFinished = callback;
@@ -215,7 +198,7 @@ class WorkoutController extends ChangeNotifier {
       }
 
       int cumulativeDurationOfCompletedSets = 0;
-      for (int i = 0; i < _workoutLogicService.totalSetsCompleted; i++) {
+      for (int i = 0; i < _workoutLogicService.currentOverallSetIndex; i++) {
         final set = _workoutLogicService.exercisesToPerform[i];
         if (set.isRestSet) {
           if (set.isRestBlock) {
@@ -347,7 +330,7 @@ class WorkoutController extends ChangeNotifier {
       workoutType: _workoutLogicService.workoutType,
       // intervalTime: _workout.intervalTimeBetweenSets, // Removed as it's no longer global
       wasStoppedPrematurely: details.wasStoppedPrematurely,
-      totalSets: _workoutLogicService.totalSetsCompleted,
+      totalSets: _workoutLogicService.totalWorkSets, // Use totalWorkSets
     );
   }
 }

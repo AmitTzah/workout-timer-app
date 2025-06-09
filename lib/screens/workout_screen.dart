@@ -98,7 +98,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                     ? _workoutController.elapsedSurvivalTimeStream
                     : _workoutController.totalTimeRemainingStream,
                 totalSetsCompleted: _workoutController.totalSetsCompleted,
-                totalExercisesToPerform: _workoutController.totalSets,
+                totalExercisesToPerform: _workoutController.totalWorkSets,
               ),
               WorkoutSetList(
                 scrollController: _scrollController,
