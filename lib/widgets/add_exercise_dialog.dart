@@ -27,7 +27,7 @@ class _AddExerciseDialogState extends State<AddExerciseDialog> {
     super.initState();
     _selectedExerciseName = widget.predefinedExercises.first;
     _workTimeController.text = '60';
-    _restTimeController.text = '10';
+    _restTimeController.text = '0';
   }
 
   @override
