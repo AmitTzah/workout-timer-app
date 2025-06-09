@@ -330,7 +330,9 @@ class WorkoutController extends ChangeNotifier {
       workoutType: _workoutLogicService.workoutType,
       // intervalTime: _workout.intervalTimeBetweenSets, // Removed as it's no longer global
       wasStoppedPrematurely: details.wasStoppedPrematurely,
-      totalSets: _workoutLogicService.totalSetsCompleted, // Use totalSetsCompleted
+      totalSets: details.wasStoppedPrematurely
+          ? _workoutLogicService.totalSetsCompleted
+          : _workoutLogicService.totalWorkSets,
     );
   }
 }
