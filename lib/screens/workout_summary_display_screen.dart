@@ -51,29 +51,31 @@ class WorkoutSummaryDisplayScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              summary.wasStoppedPrematurely
-                  ? 'Workout Stopped Early!'
-                  : (summary.isSurvivalMode ? 'Survival Workout Ended!' : 'Workout Complete!'),
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            const SizedBox(height: 20),
-            _buildSummaryRow(context, 'Workout Name:', summary.workoutName),
-            _buildSummaryRow(context, 'Date:', DateFormat('yyyy-MM-dd HH:mm').format(summary.date)),
-            _buildSummaryRow(context, 'Total Duration:', _formatDuration(summary.totalDurationInSeconds)),
-            _buildSummaryRow(context, 'Workout Level:', summary.workoutLevel.toString()),
-            _buildSummaryRow(context, 'Sets Order:', summary.workoutType.toString().split('.').last == 'alternating' ? 'Alternating' : 'Sequential'),
-            _buildSummaryRow(context, 'Total Sets Performed:', summary.totalSets.toString()),
-            const SizedBox(height: 20),
-            Text(
-              'Workout Plan Performed:',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            Expanded(
-              child: ListView.builder(
+        child: SingleChildScrollView( // Wrap with SingleChildScrollView
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                summary.wasStoppedPrematurely
+                    ? 'Workout Stopped Early!'
+                    : (summary.isSurvivalMode ? 'Survival Workout Ended!' : 'Workout Complete!'),
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              const SizedBox(height: 20),
+              _buildSummaryRow(context, 'Workout Name:', summary.workoutName),
+              _buildSummaryRow(context, 'Date:', DateFormat('yyyy-MM-dd HH:mm').format(summary.date)),
+              _buildSummaryRow(context, 'Total Duration:', _formatDuration(summary.totalDurationInSeconds)),
+              _buildSummaryRow(context, 'Workout Level:', summary.workoutLevel.toString()),
+              _buildSummaryRow(context, 'Sets Order:', summary.workoutType.toString().split('.').last == 'alternating' ? 'Alternating' : 'Sequential'),
+              _buildSummaryRow(context, 'Total Sets Performed:', summary.totalSets.toString()),
+              const SizedBox(height: 20),
+              Text(
+                'Workout Plan Performed:',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              ListView.builder(
+                shrinkWrap: true, // Important for ListView inside SingleChildScrollView
+                physics: const NeverScrollableScrollPhysics(), // Disable ListView's own scrolling
                 itemCount: summary.performedSets.length,
                 itemBuilder: (context, index) {
                   final workoutSet = summary.performedSets[index];
@@ -106,46 +108,46 @@ class WorkoutSummaryDisplayScreen extends StatelessWidget {
                   }
                 },
               ),
-            ),
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0, bottom: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).popUntil((route) => route.isFirst); // Go back to setup screen
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      minimumSize: const Size(150, 50),
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0, bottom: 16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).popUntil((route) => route.isFirst); // Go back to setup screen
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        minimumSize: const Size(150, 50),
+                      ),
+                      child: const Text(
+                        'Discard Workout',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
                     ),
-                    child: const Text(
-                      'Discard Workout',
-                      style: TextStyle(fontSize: 18, color: Colors.white),
+                    ElevatedButton(
+                      onPressed: () async {
+                        final workoutSummaryRepository = Provider.of<WorkoutSummaryRepository>(context, listen: false);
+                        await workoutSummaryRepository.addWorkoutSummary(summary); // Use the passed summary
+                        if (!context.mounted) return;
+                        Navigator.of(context).popUntil((route) => route.isFirst); // Go back to setup screen
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        minimumSize: const Size(150, 50),
+                      ),
+                      child: const Text(
+                        'Save Workout',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
                     ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final workoutSummaryRepository = Provider.of<WorkoutSummaryRepository>(context, listen: false);
-                      await workoutSummaryRepository.addWorkoutSummary(summary); // Use the passed summary
-                      if (!context.mounted) return;
-                      Navigator.of(context).popUntil((route) => route.isFirst); // Go back to setup screen
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      minimumSize: const Size(150, 50),
-                    ),
-                    child: const Text(
-                      'Save Workout',
-                      style: TextStyle(fontSize: 18, color: Colors.white),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
