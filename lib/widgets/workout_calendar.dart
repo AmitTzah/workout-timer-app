@@ -9,6 +9,7 @@ class WorkoutCalendar extends StatelessWidget {
   final Map<DateTime, List<WorkoutSummary>> events;
   final Function(DateTime, DateTime) onDaySelected;
   final Function(CalendarFormat) onFormatChanged;
+  final Function(DateTime) onPageChanged;
   final List<WorkoutSummary> Function(DateTime) getEventsForDay;
 
   const WorkoutCalendar({
@@ -19,6 +20,7 @@ class WorkoutCalendar extends StatelessWidget {
     required this.events,
     required this.onDaySelected,
     required this.onFormatChanged,
+    required this.onPageChanged,
     required this.getEventsForDay,
   });
 
@@ -33,6 +35,11 @@ class WorkoutCalendar extends StatelessWidget {
       eventLoader: getEventsForDay,
       calendarFormat: calendarFormat,
       onFormatChanged: onFormatChanged,
+      onPageChanged: onPageChanged,
+      headerStyle: const HeaderStyle(
+        formatButtonVisible: true,
+        titleCentered: true,
+      ),
       calendarStyle: const CalendarStyle(
         todayDecoration: BoxDecoration(
           color: Colors.blueAccent,
@@ -44,6 +51,72 @@ class WorkoutCalendar extends StatelessWidget {
         ),
       ),
       calendarBuilders: CalendarBuilders(
+        headerTitleBuilder: (context, date) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              // IconButton(
+              //   icon: const Icon(Icons.chevron_left),
+              //   onPressed: () {
+              //     onPageChanged(DateTime(date.year, date.month - 1));
+              //   },
+              // ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  DropdownButton<int>(
+                    value: date.year,
+                    onChanged: (int? newValue) {
+                      if (newValue != null) {
+                        onPageChanged(DateTime(newValue, date.month));
+                      }
+                    },
+                    items: List.generate(11, (index) => 2020 + index)
+                        .map<DropdownMenuItem<int>>((int value) {
+                      return DropdownMenuItem<int>(
+                        value: value,
+                        child: Text(value.toString()),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(width: 10),
+                  DropdownButton<int>(
+                    value: date.month,
+                    onChanged: (int? newValue) {
+                      if (newValue != null) {
+                        onPageChanged(DateTime(date.year, newValue));
+                      }
+                    },
+                    items: List.generate(12, (index) => index + 1)
+                        .map<DropdownMenuItem<int>>((int value) {
+                      return DropdownMenuItem<int>(
+                        value: value,
+                        child: Text(
+                          [
+                            'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+                          ][value - 1],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+              IconButton(
+                icon: const Icon(Icons.today),
+                onPressed: () {
+                  onPageChanged(DateTime.now());
+                },
+              ),
+              // IconButton(
+              //   icon: const Icon(Icons.chevron_right),
+              //   onPressed: () {
+              //     onPageChanged(DateTime(date.year, date.month + 1));
+              //   },
+              // ),
+            ],
+          );
+        },
         markerBuilder: (context, date, events) {
           if (events.isNotEmpty) {
             return Positioned(

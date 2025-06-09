@@ -52,6 +52,12 @@ class WorkoutCalendarScreenState extends State<WorkoutCalendarScreen> {
     }
   }
 
+  void _onPageChanged(DateTime focusedDay) {
+    setState(() {
+      _focusedDay = focusedDay;
+    });
+  }
+
   void _onFormatChanged(CalendarFormat format) {
     if (_calendarFormat != format) {
       setState(() {
@@ -88,6 +94,7 @@ class WorkoutCalendarScreenState extends State<WorkoutCalendarScreen> {
                   events: _events,
                   onDaySelected: _onDaySelected,
                   onFormatChanged: _onFormatChanged,
+                  onPageChanged: _onPageChanged,
                   getEventsForDay: _getEventsForDay,
                 ),
                 const SizedBox(height: 8.0),
