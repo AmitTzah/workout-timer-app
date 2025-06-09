@@ -70,6 +70,7 @@ class WorkoutSummaryDisplayScreen extends StatelessWidget {
               _buildSummaryRow(context, 'Total Sets Performed:', summary.totalSets.toString()),
               const SizedBox(height: 20),
               ExpansionTile(
+                initiallyExpanded: true,
                 title: Text(
                   'Workout Plan Performed:',
                   style: Theme.of(context).textTheme.titleMedium,
