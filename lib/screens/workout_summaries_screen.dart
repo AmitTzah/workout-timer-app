@@ -21,11 +21,14 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
   final ScrollController _scrollController = ScrollController();
   final Map<dynamic, GlobalKey> _summaryKeys = {};
   String? _expandedWorkoutName;
+  late Map<String, List<WorkoutSummary>> _groupedSummaries;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _workoutSummaryRepository = Provider.of<WorkoutSummaryRepository>(context);
+    _groupedSummaries =
+        _groupSummaries(_workoutSummaryRepository.getAllWorkoutSummaries());
     if (widget.highlightedSummary != null) {
       _expandedWorkoutName = widget.highlightedSummary!.workoutName;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -227,15 +230,12 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
               ),
             );
           }
-          final List<WorkoutSummary> summaries = box.values
-              .toList()
-              .cast<WorkoutSummary>();
-          final groupedSummaries = _groupSummaries(summaries);
-          final sortedWorkoutNames = groupedSummaries.keys.toList()
+          _groupedSummaries = _groupSummaries(box.values.toList().cast<WorkoutSummary>());
+          final sortedWorkoutNames = _groupedSummaries.keys.toList()
             ..sort(
-              (a, b) => groupedSummaries[b]!.first.date.compareTo(
-                groupedSummaries[a]!.first.date,
-              ),
+              (a, b) => _groupedSummaries[b]!.first.date.compareTo(
+                    _groupedSummaries[a]!.first.date,
+                  ),
             );
 
           return ListView.builder(
@@ -243,7 +243,7 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
             itemCount: sortedWorkoutNames.length,
             itemBuilder: (context, index) {
               final workoutName = sortedWorkoutNames[index];
-              final workoutSummaries = groupedSummaries[workoutName]!;
+              final workoutSummaries = _groupedSummaries[workoutName]!;
               return Card(
                 margin: const EdgeInsets.all(8.0),
                 child: ExpansionTile(
