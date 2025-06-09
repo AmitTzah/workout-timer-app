@@ -116,39 +116,41 @@ class WorkoutSummaryDisplayScreen extends StatelessWidget {
               const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.only(top: 8.0, bottom: 16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).popUntil((route) => route.isFirst); // Go back to setup screen
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        minimumSize: const Size(150, 50),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).popUntil((route) => route.isFirst); // Go back to setup screen
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                        ),
+                        child: const Text(
+                          'Discard Workout',
+                          style: TextStyle(fontSize: 18, color: Colors.white),
+                        ),
                       ),
-                      child: const Text(
-                        'Discard Workout',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      const SizedBox(width: 16),
+                      ElevatedButton(
+                        onPressed: () async {
+                          final workoutSummaryRepository = Provider.of<WorkoutSummaryRepository>(context, listen: false);
+                          await workoutSummaryRepository.addWorkoutSummary(summary); // Use the passed summary
+                          if (!context.mounted) return;
+                          Navigator.of(context).popUntil((route) => route.isFirst); // Go back to setup screen
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                        ),
+                        child: const Text(
+                          'Save Workout',
+                          style: TextStyle(fontSize: 18, color: Colors.white),
+                        ),
                       ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () async {
-                        final workoutSummaryRepository = Provider.of<WorkoutSummaryRepository>(context, listen: false);
-                        await workoutSummaryRepository.addWorkoutSummary(summary); // Use the passed summary
-                        if (!context.mounted) return;
-                        Navigator.of(context).popUntil((route) => route.isFirst); // Go back to setup screen
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        minimumSize: const Size(150, 50),
-                      ),
-                      child: const Text(
-                        'Save Workout',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
