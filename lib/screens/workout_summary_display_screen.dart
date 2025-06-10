@@ -137,7 +137,7 @@ class WorkoutSummaryDisplayScreen extends StatelessWidget {
                       ElevatedButton(
                         onPressed: () async {
                           final workoutSummaryRepository = Provider.of<WorkoutSummaryRepository>(context, listen: false);
-                          await workoutSummaryRepository.addWorkoutSummary(summary); // Use the passed summary
+                          await workoutSummaryRepository.saveWorkoutSummary(summary); // Use the passed summary
                           if (!context.mounted) return;
                           Navigator.of(context).popUntil((route) => route.isFirst); // Go back to setup screen
                         },

@@ -1,9 +1,12 @@
 import 'package:hive/hive.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:workout_timer_app/models/workout_item.dart';
 import 'package:workout_timer_app/models/workout_type.dart';
+import 'package:workout_timer_app/utils/workout_item_converter.dart';
 
 part 'user_workout.g.dart';
 
+@JsonSerializable(explicitToJson: true)
 @HiveType(typeId: 2) // Use a new unique typeId
 class UserWorkout extends HiveObject {
   @HiveField(0)
@@ -13,6 +16,7 @@ class UserWorkout extends HiveObject {
   String name;
 
   @HiveField(2)
+  @WorkoutItemConverter() // Apply the custom converter
   List<WorkoutItem> items; // Changed from List<Exercise> to List<WorkoutItem>
 
   @HiveField(3)
@@ -37,15 +41,7 @@ class UserWorkout extends HiveObject {
     this.selectedSurvivalMode,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'name': name,
-      'items': items.map((item) => item.toMap()).toList(),
-      'totalWorkoutTime': totalWorkoutTime,
-      'workoutType': workoutType.toString().split('.').last, // Convert enum to string
-      'selectedLevel': selectedLevel,
-      'selectedSurvivalMode': selectedSurvivalMode,
-    };
-  }
+  factory UserWorkout.fromJson(Map<String, dynamic> json) =>
+      _$UserWorkoutFromJson(json);
+  Map<String, dynamic> toJson() => _$UserWorkoutToJson(this);
 }

@@ -42,3 +42,19 @@ class RestBlockItemAdapter extends TypeAdapter<RestBlockItem> {
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+RestBlockItem _$RestBlockItemFromJson(Map<String, dynamic> json) =>
+    RestBlockItem(
+      id: json['id'] as String,
+      durationInSeconds: (json['durationInSeconds'] as num).toInt(),
+    );
+
+Map<String, dynamic> _$RestBlockItemToJson(RestBlockItem instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'durationInSeconds': instance.durationInSeconds,
+    };

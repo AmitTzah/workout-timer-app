@@ -1,9 +1,11 @@
 import 'package:hive/hive.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:workout_timer_app/models/workout_set.dart';
 import 'package:workout_timer_app/models/workout_type.dart';
 
 part 'workout_summary.g.dart';
 
+@JsonSerializable(explicitToJson: true)
 @HiveType(typeId: 1)
 class WorkoutSummary extends HiveObject {
   @HiveField(0)
@@ -44,6 +46,10 @@ class WorkoutSummary extends HiveObject {
     required this.wasStoppedPrematurely,
     required this.totalSets,
   });
+
+  factory WorkoutSummary.fromJson(Map<String, dynamic> json) =>
+      _$WorkoutSummaryFromJson(json);
+  Map<String, dynamic> toJson() => _$WorkoutSummaryToJson(this);
 
   // Helper to get Duration object
   Duration get totalDuration => Duration(seconds: totalDurationInSeconds);

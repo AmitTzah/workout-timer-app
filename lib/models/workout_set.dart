@@ -1,9 +1,11 @@
 import 'package:hive/hive.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:workout_timer_app/models/exercise.dart';
 // Import WorkoutItem
 
 part 'workout_set.g.dart';
 
+@JsonSerializable(explicitToJson: true)
 @HiveType(typeId: 6) // Changed typeId to 6
 class WorkoutSet extends HiveObject {
   @HiveField(0)
@@ -28,4 +30,8 @@ class WorkoutSet extends HiveObject {
     this.isRestBlock = false,
     this.restBlockDuration,
   });
+
+  factory WorkoutSet.fromJson(Map<String, dynamic> json) =>
+      _$WorkoutSetFromJson(json);
+  Map<String, dynamic> toJson() => _$WorkoutSetToJson(this);
 }

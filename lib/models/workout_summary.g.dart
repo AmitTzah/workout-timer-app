@@ -63,3 +63,40 @@ class WorkoutSummaryAdapter extends TypeAdapter<WorkoutSummary> {
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+WorkoutSummary _$WorkoutSummaryFromJson(Map<String, dynamic> json) =>
+    WorkoutSummary(
+      date: DateTime.parse(json['date'] as String),
+      performedSets: (json['performedSets'] as List<dynamic>)
+          .map((e) => WorkoutSet.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      totalDurationInSeconds: (json['totalDurationInSeconds'] as num).toInt(),
+      workoutName: json['workoutName'] as String,
+      workoutLevel: (json['workoutLevel'] as num).toInt(),
+      isSurvivalMode: json['isSurvivalMode'] as bool,
+      workoutType: $enumDecode(_$WorkoutTypeEnumMap, json['workoutType']),
+      wasStoppedPrematurely: json['wasStoppedPrematurely'] as bool,
+      totalSets: (json['totalSets'] as num).toInt(),
+    );
+
+Map<String, dynamic> _$WorkoutSummaryToJson(WorkoutSummary instance) =>
+    <String, dynamic>{
+      'date': instance.date.toIso8601String(),
+      'performedSets': instance.performedSets.map((e) => e.toJson()).toList(),
+      'totalDurationInSeconds': instance.totalDurationInSeconds,
+      'workoutName': instance.workoutName,
+      'workoutLevel': instance.workoutLevel,
+      'isSurvivalMode': instance.isSurvivalMode,
+      'workoutType': _$WorkoutTypeEnumMap[instance.workoutType]!,
+      'wasStoppedPrematurely': instance.wasStoppedPrematurely,
+      'totalSets': instance.totalSets,
+    };
+
+const _$WorkoutTypeEnumMap = {
+  WorkoutType.sequential: 'sequential',
+  WorkoutType.alternating: 'alternating',
+};

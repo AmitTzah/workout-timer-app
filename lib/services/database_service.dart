@@ -23,7 +23,6 @@ class DatabaseService {
     if (!Hive.isAdapterRegistered(1)) Hive.registerAdapter(WorkoutSummaryAdapter());
     if (!Hive.isAdapterRegistered(2)) Hive.registerAdapter(UserWorkoutAdapter());
     if (!Hive.isAdapterRegistered(3)) Hive.registerAdapter(ExerciseItemAdapter()); // ExerciseItem typeId
-    if (!Hive.isAdapterRegistered(4)) Hive.registerAdapter(WorkoutItemAdapter()); // WorkoutItem typeId
     if (!Hive.isAdapterRegistered(9)) Hive.registerAdapter(RestBlockItemAdapter()); // RestBlockItem typeId
     if (!Hive.isAdapterRegistered(5)) Hive.registerAdapter(GoalAdapter()); // Goal typeId
     if (!Hive.isAdapterRegistered(6)) Hive.registerAdapter(WorkoutSetAdapter()); // WorkoutSet typeId

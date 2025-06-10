@@ -51,3 +51,24 @@ class WorkoutSetAdapter extends TypeAdapter<WorkoutSet> {
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+WorkoutSet _$WorkoutSetFromJson(Map<String, dynamic> json) => WorkoutSet(
+      exercise: Exercise.fromJson(json['exercise'] as Map<String, dynamic>),
+      setNumber: (json['setNumber'] as num).toInt(),
+      isRestSet: json['isRestSet'] as bool? ?? false,
+      isRestBlock: json['isRestBlock'] as bool? ?? false,
+      restBlockDuration: (json['restBlockDuration'] as num?)?.toInt(),
+    );
+
+Map<String, dynamic> _$WorkoutSetToJson(WorkoutSet instance) =>
+    <String, dynamic>{
+      'exercise': instance.exercise.toJson(),
+      'setNumber': instance.setNumber,
+      'isRestSet': instance.isRestSet,
+      'isRestBlock': instance.isRestBlock,
+      'restBlockDuration': instance.restBlockDuration,
+    };

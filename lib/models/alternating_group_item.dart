@@ -1,9 +1,11 @@
 import 'package:hive/hive.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:workout_timer_app/models/exercise.dart';
 import 'package:workout_timer_app/models/workout_item.dart';
 
 part 'alternating_group_item.g.dart';
 
+@JsonSerializable(explicitToJson: true)
 @HiveType(typeId: 8)
 class AlternatingGroupItem extends WorkoutItem {
   @HiveField(1) // Shifted from 0
@@ -26,15 +28,18 @@ class AlternatingGroupItem extends WorkoutItem {
     required this.exercises,
   });
 
+  factory AlternatingGroupItem.fromJson(Map<String, dynamic> json) =>
+      _$AlternatingGroupItemFromJson(json);
+
   @override
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toJson() {
     return {
       'type': 'AlternatingGroupItem', // Indicate the concrete type
       'id': id,
       'name': name,
       'cycles': cycles,
       'groupRestInSeconds': groupRestInSeconds,
-      'exercises': exercises.map((e) => e.toMap()).toList(),
+      'exercises': exercises.map((e) => e.toJson()).toList(),
     };
   }
 }

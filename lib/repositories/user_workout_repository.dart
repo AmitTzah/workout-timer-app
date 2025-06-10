@@ -14,10 +14,10 @@ class UserWorkoutRepository {
     
     // Log the full workout object for debugging
     try {
-      final workoutJson = JsonEncoder.withIndent('  ').convert(workout.toMap());
+      final workoutJson = JsonEncoder.withIndent('  ').convert(workout.toJson());
       developer.log('[UserWorkoutRepository] Workout data being saved: $workoutJson', name: 'UserWorkoutRepository');
     } catch (e) {
-      developer.log('[UserWorkoutRepository] Error converting workout to map for logging: $e', name: 'UserWorkoutRepository');
+      developer.log('[UserWorkoutRepository] Error converting workout to JSON for logging: $e', name: 'UserWorkoutRepository');
     }
 
     try {
@@ -39,6 +39,10 @@ class UserWorkoutRepository {
 
   Future<void> deleteUserWorkout(String id) async {
     await _userWorkoutsBox.delete(id);
+  }
+
+  Future<void> clearAllUserWorkouts() async {
+    await _userWorkoutsBox.clear();
   }
 
   ValueListenable<Box<UserWorkout>> get listenable => _userWorkoutsBox.listenable();

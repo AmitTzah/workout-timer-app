@@ -1,7 +1,9 @@
 import 'package:hive/hive.dart';
+import 'package:json_annotation/json_annotation.dart';
 
 part 'exercise.g.dart';
 
+@JsonSerializable()
 @HiveType(typeId: 0)
 class Exercise extends HiveObject {
   @HiveField(0)
@@ -35,15 +37,7 @@ class Exercise extends HiveObject {
     this.restTimeInSeconds,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'name': name,
-      'sets': sets,
-      'reps': reps,
-      'audioFileName': audioFileName,
-      'workTimeInSeconds': workTimeInSeconds,
-      'restTimeInSeconds': restTimeInSeconds,
-    };
-  }
+  factory Exercise.fromJson(Map<String, dynamic> json) =>
+      _$ExerciseFromJson(json);
+  Map<String, dynamic> toJson() => _$ExerciseToJson(this);
 }

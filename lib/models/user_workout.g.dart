@@ -57,3 +57,38 @@ class UserWorkoutAdapter extends TypeAdapter<UserWorkout> {
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+UserWorkout _$UserWorkoutFromJson(Map<String, dynamic> json) => UserWorkout(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      items: (json['items'] as List<dynamic>)
+          .map((e) =>
+              const WorkoutItemConverter().fromJson(e as Map<String, dynamic>))
+          .toList(),
+      totalWorkoutTime: (json['totalWorkoutTime'] as num).toInt(),
+      workoutType:
+          $enumDecodeNullable(_$WorkoutTypeEnumMap, json['workoutType']) ??
+              WorkoutType.sequential,
+      selectedLevel: (json['selectedLevel'] as num?)?.toInt(),
+      selectedSurvivalMode: json['selectedSurvivalMode'] as bool?,
+    );
+
+Map<String, dynamic> _$UserWorkoutToJson(UserWorkout instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'items': instance.items.map(const WorkoutItemConverter().toJson).toList(),
+      'totalWorkoutTime': instance.totalWorkoutTime,
+      'workoutType': _$WorkoutTypeEnumMap[instance.workoutType]!,
+      'selectedLevel': instance.selectedLevel,
+      'selectedSurvivalMode': instance.selectedSurvivalMode,
+    };
+
+const _$WorkoutTypeEnumMap = {
+  WorkoutType.sequential: 'sequential',
+  WorkoutType.alternating: 'alternating',
+};
