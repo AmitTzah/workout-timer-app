@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:developer' as developer;
 import 'package:uuid/uuid.dart';
 import 'package:provider/provider.dart';
 import 'package:workout_timer_app/models/exercise.dart';
@@ -555,10 +556,13 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
   }
 
   Future<void> _saveWorkout() async {
+    developer.log('[_saveWorkout] Attempting to save workout.', name: 'DefineWorkoutScreen');
+
     if (_workoutNameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a workout name.')),
       );
+      developer.log('[_saveWorkout] Workout name is empty.', name: 'DefineWorkoutScreen');
       return;
     }
 
@@ -569,13 +573,18 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
             content: Text('Please add at least one exercise or rest block.'),
           ),
         );
+        developer.log('[_saveWorkout] Workout items list is empty.', name: 'DefineWorkoutScreen');
         return;
       }
 
       // Remove empty alternating groups before saving
+      final int initialItemCount = _workoutItems.length;
       _workoutItems.removeWhere(
         (item) => item is AlternatingGroupItem && item.exercises.isEmpty,
       );
+      if (_workoutItems.length < initialItemCount) {
+        developer.log('[_saveWorkout] Removed empty alternating groups. New item count: ${_workoutItems.length}', name: 'DefineWorkoutScreen');
+      }
 
       if (_workoutItems.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -585,6 +594,7 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
             ),
           ),
         );
+        developer.log('[_saveWorkout] Workout items list became empty after removing empty groups.', name: 'DefineWorkoutScreen');
         return;
       }
 
@@ -599,10 +609,32 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
         workoutType: _workoutType,
       );
 
-      await _userWorkoutRepository.saveUserWorkout(newWorkout);
+      developer.log('[_saveWorkout] UserWorkout object created: id=$_workoutId, name=$workoutName, totalDuration=$totalDuration, workoutType=${_workoutType.name}, itemsCount=${_workoutItems.length}', name: 'DefineWorkoutScreen');
 
-      if (!mounted) return;
+      try {
+        developer.log('[_saveWorkout] Calling saveUserWorkout on repository...', name: 'DefineWorkoutScreen');
+        await _userWorkoutRepository.saveUserWorkout(newWorkout);
+        developer.log('[_saveWorkout] saveUserWorkout completed successfully.', name: 'DefineWorkoutScreen');
+      } catch (e, stack) {
+        developer.log('[_saveWorkout] Error saving workout: $e\n$stack', name: 'DefineWorkoutScreen', error: e, stackTrace: stack);
+        if (!mounted) {
+          developer.log('[_saveWorkout] Widget is not mounted after error. Cannot show SnackBar.', name: 'DefineWorkoutScreen');
+          return;
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving workout: $e')),
+        );
+        return;
+      }
+
+      if (!mounted) {
+        developer.log('[_saveWorkout] Widget is not mounted after successful save. Cannot pop navigator.', name: 'DefineWorkoutScreen');
+        return;
+      }
+      developer.log('[_saveWorkout] Navigating back after successful save.', name: 'DefineWorkoutScreen');
       Navigator.of(context).pop();
+    } else {
+      developer.log('[_saveWorkout] Form validation failed.', name: 'DefineWorkoutScreen');
     }
   }
 

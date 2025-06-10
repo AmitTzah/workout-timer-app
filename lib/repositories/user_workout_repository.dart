@@ -1,6 +1,7 @@
 import 'package:hive_flutter/hive_flutter.dart'; // For ValueListenable and Box
 import 'package:workout_timer_app/models/user_workout.dart';
 import 'package:flutter/foundation.dart'; // For ValueListenable
+import 'dart:developer' as developer;
 
 class UserWorkoutRepository {
   final Box<UserWorkout> _userWorkoutsBox;
@@ -8,7 +9,14 @@ class UserWorkoutRepository {
   UserWorkoutRepository(this._userWorkoutsBox);
 
   Future<void> saveUserWorkout(UserWorkout workout) async {
-    await _userWorkoutsBox.put(workout.id, workout);
+    developer.log('[UserWorkoutRepository] Attempting to save workout with ID: ${workout.id}, Name: ${workout.name}', name: 'UserWorkoutRepository');
+    try {
+      await _userWorkoutsBox.put(workout.id, workout);
+      developer.log('[UserWorkoutRepository] Successfully saved workout with ID: ${workout.id}', name: 'UserWorkoutRepository');
+    } catch (e, stack) {
+      developer.log('[UserWorkoutRepository] Error saving workout with ID: ${workout.id}: $e\n$stack', name: 'UserWorkoutRepository', error: e, stackTrace: stack);
+      rethrow; // Re-throw the error so it can be caught by the UI layer
+    }
   }
 
   UserWorkout? getUserWorkout(String id) {
