@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 // Import Hive
 import 'package:workout_timer_app/services/database_service.dart';
-import 'package:workout_timer_app/screens/home_screen.dart';
+import 'package:workout_timer_app/screens/app_navigator.dart';
 import 'package:workout_timer_app/repositories/user_workout_repository.dart';
 import 'package:workout_timer_app/repositories/workout_summary_repository.dart';
 import 'package:workout_timer_app/services/audio_service.dart';
@@ -61,7 +61,7 @@ class WorkoutTimerApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const HomeScreen(),
+      home: const AppNavigator(),
     );
   }
 }
