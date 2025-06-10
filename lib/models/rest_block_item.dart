@@ -9,4 +9,13 @@ class RestBlockItem extends WorkoutItem {
   int durationInSeconds;
 
   RestBlockItem({required super.id, required this.durationInSeconds}); // Pass id to super constructor
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'type': 'RestBlockItem', // Indicate the concrete type
+      'id': id,
+      'durationInSeconds': durationInSeconds,
+    };
+  }
 }

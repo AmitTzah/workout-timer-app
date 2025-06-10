@@ -11,6 +11,8 @@ abstract class WorkoutItem extends HiveObject {
   String id;
 
   WorkoutItem({required this.id});
+
+  Map<String, dynamic> toMap(); // Abstract method
 }
 
 @HiveType(typeId: 3) // Changed typeId for ExerciseItem
@@ -19,4 +21,13 @@ class ExerciseItem extends WorkoutItem {
   Exercise exercise;
 
   ExerciseItem({required this.exercise, required super.id}); // Pass id to super constructor
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'type': 'ExerciseItem', // Indicate the concrete type
+      'id': id,
+      'exercise': exercise.toMap(), // Assuming Exercise also has a toMap()
+    };
+  }
 }

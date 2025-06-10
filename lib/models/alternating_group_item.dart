@@ -25,4 +25,16 @@ class AlternatingGroupItem extends WorkoutItem {
     this.groupRestInSeconds,
     required this.exercises,
   });
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'type': 'AlternatingGroupItem', // Indicate the concrete type
+      'id': id,
+      'name': name,
+      'cycles': cycles,
+      'groupRestInSeconds': groupRestInSeconds,
+      'exercises': exercises.map((e) => e.toMap()).toList(),
+    };
+  }
 }

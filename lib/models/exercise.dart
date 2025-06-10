@@ -34,4 +34,16 @@ class Exercise extends HiveObject {
     required this.workTimeInSeconds,
     this.restTimeInSeconds,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'sets': sets,
+      'reps': reps,
+      'audioFileName': audioFileName,
+      'workTimeInSeconds': workTimeInSeconds,
+      'restTimeInSeconds': restTimeInSeconds,
+    };
+  }
 }

@@ -36,4 +36,16 @@ class UserWorkout extends HiveObject {
     this.selectedLevel,
     this.selectedSurvivalMode,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'items': items.map((item) => item.toMap()).toList(),
+      'totalWorkoutTime': totalWorkoutTime,
+      'workoutType': workoutType.toString().split('.').last, // Convert enum to string
+      'selectedLevel': selectedLevel,
+      'selectedSurvivalMode': selectedSurvivalMode,
+    };
+  }
 }
