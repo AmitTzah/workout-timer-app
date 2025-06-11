@@ -65,7 +65,7 @@ class BackupService {
       if (result != null && result.files.single.path != null) {
         final filePath = result.files.single.path!;
         // Manual check for .json extension
-        if (!filePath.toLowerCase().endsWith('.json')) {
+        if (!RegExp(r'\.json(\s\(\d+\))?$', caseSensitive: false).hasMatch(filePath.toLowerCase())) {
           debugPrint('Invalid file type selected. Please select a .json file.');
           return 'Invalid file type. Please select a .json backup file.';
         }

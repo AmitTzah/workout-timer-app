@@ -94,16 +94,16 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.upload_file),
             tooltip: 'Import Data',
             onPressed: () async {
-              await _backupService.importData();
-              _showSnackBar('Data import attempt complete. Check console for details.');
+              final String message = await _backupService.importData();
+              _showSnackBar(message);
             },
           ),
           IconButton(
             icon: const Icon(Icons.download),
             tooltip: 'Export Data',
             onPressed: () async {
-              await _backupService.exportData();
-              _showSnackBar('Data export attempt complete. Check console for details.');
+              final String message = await _backupService.exportData();
+              _showSnackBar(message);
             },
           ),
         ],
