@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 // Import Hive
-import 'package:hive/hive.dart';
-import 'package:workout_timer_app/services/database_service.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:workout_timer_app/screens/app_navigator.dart';
 import 'package:workout_timer_app/repositories/user_workout_repository.dart';
 import 'package:workout_timer_app/repositories/workout_summary_repository.dart';
@@ -11,10 +10,27 @@ import 'package:workout_timer_app/repositories/hive/hive_workout_summary_reposit
 import 'package:workout_timer_app/services/audio_service.dart';
 import 'package:workout_timer_app/models/user_workout.dart'; // Import UserWorkout
 import 'package:workout_timer_app/models/workout_summary.dart'; // Import WorkoutSummary
+import 'package:workout_timer_app/models/exercise.dart';
+import 'package:workout_timer_app/models/goal.dart';
+import 'package:workout_timer_app/models/workout_set.dart';
+import 'package:workout_timer_app/models/workout_item.dart';
+import 'package:workout_timer_app/models/workout_type.dart';
+import 'package:workout_timer_app/models/alternating_group_item.dart';
+import 'package:workout_timer_app/models/rest_block_item.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await DatabaseService.init();
+  await Hive.initFlutter();
+
+  if (!Hive.isAdapterRegistered(0)) Hive.registerAdapter(ExerciseAdapter());
+  if (!Hive.isAdapterRegistered(1)) Hive.registerAdapter(WorkoutSummaryAdapter());
+  if (!Hive.isAdapterRegistered(2)) Hive.registerAdapter(UserWorkoutAdapter());
+  if (!Hive.isAdapterRegistered(3)) Hive.registerAdapter(ExerciseItemAdapter());
+  if (!Hive.isAdapterRegistered(9)) Hive.registerAdapter(RestBlockItemAdapter());
+  if (!Hive.isAdapterRegistered(5)) Hive.registerAdapter(GoalAdapter());
+  if (!Hive.isAdapterRegistered(6)) Hive.registerAdapter(WorkoutSetAdapter());
+  if (!Hive.isAdapterRegistered(7)) Hive.registerAdapter(WorkoutTypeAdapter());
+  if (!Hive.isAdapterRegistered(8)) Hive.registerAdapter(AlternatingGroupItemAdapter());
 
   // Open Hive boxes
   await Hive.openBox<UserWorkout>('user_workouts');
