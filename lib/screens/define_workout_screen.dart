@@ -613,7 +613,7 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
 
       try {
         developer.log('[_saveWorkout] Calling saveUserWorkout on repository...', name: 'DefineWorkoutScreen');
-        await _userWorkoutRepository.saveUserWorkout(newWorkout);
+        await _userWorkoutRepository.saveWorkout(newWorkout);
         developer.log('[_saveWorkout] saveUserWorkout completed successfully.', name: 'DefineWorkoutScreen');
       } catch (e, stack) {
         developer.log('[_saveWorkout] Error saving workout: $e\n$stack', name: 'DefineWorkoutScreen', error: e, stackTrace: stack);

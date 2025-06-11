@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:hive/hive.dart'; // Keep Hive import for Box type
 import 'package:workout_timer_app/models/workout_summary.dart';
 import 'package:workout_timer_app/repositories/workout_summary_repository.dart';
 import 'package:workout_timer_app/screens/workout_calendar_screen.dart'; // Use the new repository
@@ -27,13 +26,9 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _workoutSummaryRepository = Provider.of<WorkoutSummaryRepository>(context);
-    _groupedSummaries =
-        _groupSummaries(_workoutSummaryRepository.getAllWorkoutSummaries());
+    // No longer initialize _groupedSummaries here, it will be handled by StreamBuilder
     if (widget.highlightedSummary != null) {
       _expandedWorkoutName = widget.highlightedSummary!.workoutName;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollToSummary(widget.highlightedSummary!);
-      });
     }
   }
 
@@ -213,10 +208,17 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
           ),
         ],
       ),
-      body: ValueListenableBuilder(
-        valueListenable: _workoutSummaryRepository.listenable,
-        builder: (context, Box<WorkoutSummary> box, _) {
-          if (box.isEmpty) {
+      body: StreamBuilder<List<WorkoutSummary>>(
+        stream: _workoutSummaryRepository.watchAllWorkoutSummaries(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+          final summaries = snapshot.data ?? [];
+          if (summaries.isEmpty) {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
@@ -230,13 +232,20 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
               ),
             );
           }
-          _groupedSummaries = _groupSummaries(box.values.toList().cast<WorkoutSummary>());
+          _groupedSummaries = _groupSummaries(summaries);
           final sortedWorkoutNames = _groupedSummaries.keys.toList()
             ..sort(
               (a, b) => _groupedSummaries[b]!.first.date.compareTo(
                     _groupedSummaries[a]!.first.date,
                   ),
             );
+
+          // Scroll to highlighted summary after data is loaded
+          if (widget.highlightedSummary != null && _summaryKeys.isNotEmpty) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _scrollToSummary(widget.highlightedSummary!);
+            });
+          }
 
           return ListView.builder(
             controller: _scrollController,

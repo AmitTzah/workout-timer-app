@@ -15,8 +15,8 @@ class BackupService {
 
   Future<String> exportData() async {
     try {
-      final userWorkouts = _userWorkoutRepository.getAllUserWorkouts();
-      final workoutSummaries = _workoutSummaryRepository.getAllWorkoutSummaries();
+      final userWorkouts = await _userWorkoutRepository.getAllWorkouts();
+      final workoutSummaries = await _workoutSummaryRepository.getAllWorkoutSummaries();
 
       final backupData = BackupData(
         userWorkouts: userWorkouts,
@@ -71,12 +71,12 @@ class BackupService {
         final backupData = BackupData.fromJson(jsonMap);
 
         // Clear existing data
-        await _userWorkoutRepository.clearAllUserWorkouts();
+        await _userWorkoutRepository.clearAllWorkouts();
         await _workoutSummaryRepository.clearAllWorkoutSummaries();
 
         // Import new data
         for (var workout in backupData.userWorkouts) {
-          await _userWorkoutRepository.saveUserWorkout(workout);
+          await _userWorkoutRepository.saveWorkout(workout);
         }
         for (var summary in backupData.workoutSummaries) {
           await _workoutSummaryRepository.saveWorkoutSummary(summary);

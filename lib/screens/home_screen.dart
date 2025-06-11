@@ -20,7 +20,6 @@ class _HomeScreenState extends State<HomeScreen> {
   late WorkoutSummaryRepository _workoutSummaryRepository; // Add summary repository
   late BackupService _backupService; // Add BackupService
 
-  List<UserWorkout> _userWorkouts = [];
   final Map<String, int> _levelSelections = {}; // Stores int for level
   final Map<String, bool> _survivalModeSelections = {}; // Stores bool for survival mode
 
@@ -30,31 +29,11 @@ class _HomeScreenState extends State<HomeScreen> {
     _userWorkoutRepository = Provider.of<UserWorkoutRepository>(context);
     _workoutSummaryRepository = Provider.of<WorkoutSummaryRepository>(context); // Initialize summary repository
     _backupService = BackupService(_userWorkoutRepository, _workoutSummaryRepository); // Initialize BackupService
-
-    _userWorkoutRepository.listenable.addListener(_onWorkoutsChanged);
-    _loadUserWorkouts(); // Initial load
   }
 
   @override
   void dispose() {
-    _userWorkoutRepository.listenable.removeListener(_onWorkoutsChanged);
     super.dispose();
-  }
-
-  void _onWorkoutsChanged() {
-    _loadUserWorkouts();
-  }
-
-  void _loadUserWorkouts() {
-    final workouts = _userWorkoutRepository.getAllUserWorkouts();
-    setState(() {
-      _userWorkouts = workouts;
-      // Initialize selections from persisted values, or default
-      for (var workout in workouts) {
-        _levelSelections[workout.id] = workout.selectedLevel ?? 1;
-        _survivalModeSelections[workout.id] = workout.selectedSurvivalMode ?? false; // Initialize survival mode
-      }
-    });
   }
 
   Future<void> _deleteWorkout(String id) async {
@@ -79,8 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     if (confirm == true) {
-      await _userWorkoutRepository.deleteUserWorkout(id);
-      // _loadUserWorkouts() will be called by the listener
+      await _userWorkoutRepository.deleteWorkout(id);
     }
   }
 
@@ -117,7 +95,6 @@ class _HomeScreenState extends State<HomeScreen> {
             tooltip: 'Import Data',
             onPressed: () async {
               await _backupService.importData();
-              _loadUserWorkouts(); // Refresh workouts after import
               _showSnackBar('Data import attempt complete. Check console for details.');
             },
           ),
@@ -131,18 +108,32 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: _userWorkouts.isEmpty
-          ? const Center(
+      body: StreamBuilder<List<UserWorkout>>(
+        stream: _userWorkoutRepository.watchAllWorkouts(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(
               child: Text(
                 'No workouts defined yet. Tap the + button to create one!',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16),
               ),
-            )
-          : ListView.builder(
-              itemCount: _userWorkouts.length,
+            );
+          } else {
+            final userWorkouts = snapshot.data!;
+            // Initialize selections from persisted values, or default
+            for (var workout in userWorkouts) {
+              _levelSelections.putIfAbsent(workout.id, () => workout.selectedLevel ?? 1);
+              _survivalModeSelections.putIfAbsent(workout.id, () => workout.selectedSurvivalMode ?? false);
+            }
+            return ListView.builder(
+              itemCount: userWorkouts.length,
               itemBuilder: (context, index) {
-                final workout = _userWorkouts[index];
+                final workout = userWorkouts[index];
                 return WorkoutCard(
                   workout: workout,
                   formatTime: _formatTime,
@@ -150,10 +141,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   deleteWorkout: _deleteWorkout,
                   levelSelections: _levelSelections,
                   survivalModeSelections: _survivalModeSelections,
-                  onSelectionsChanged: _onWorkoutsChanged, // Callback to trigger setState in parent
+                  onSelectionsChanged: () {
+                    // This callback is still needed to trigger a rebuild of the card if selections change
+                    // but it doesn't need to reload workouts from the repository as the stream handles it.
+                    setState(() {});
+                  },
                 );
               },
-            ),
+            );
+          }
+        },
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(

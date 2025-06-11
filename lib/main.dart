@@ -1,33 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 // Import Hive
+import 'package:hive/hive.dart';
 import 'package:workout_timer_app/services/database_service.dart';
 import 'package:workout_timer_app/screens/app_navigator.dart';
 import 'package:workout_timer_app/repositories/user_workout_repository.dart';
 import 'package:workout_timer_app/repositories/workout_summary_repository.dart';
+import 'package:workout_timer_app/repositories/hive/hive_user_workout_repository_impl.dart';
+import 'package:workout_timer_app/repositories/hive/hive_workout_summary_repository_impl.dart';
 import 'package:workout_timer_app/services/audio_service.dart';
-// Import WorkoutType
+import 'package:workout_timer_app/models/user_workout.dart'; // Import UserWorkout
+import 'package:workout_timer_app/models/workout_summary.dart'; // Import WorkoutSummary
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DatabaseService.init();
 
-  // Adapter registration is now handled in DatabaseService.init()
-
-  final userWorkoutsBox = await DatabaseService.openUserWorkoutsBox();
-  final workoutSummariesBox = await DatabaseService.openWorkoutSummariesBox();
-  // final goalsBox = await DatabaseService.openGoalsBox(); // For future use
+  // Open Hive boxes
+  await Hive.openBox<UserWorkout>('user_workouts');
+  await Hive.openBox<WorkoutSummary>('workout_summaries');
 
   runApp(
     MultiProvider(
       providers: [
         Provider<UserWorkoutRepository>(
-          create: (_) => UserWorkoutRepository(userWorkoutsBox),
-          dispose: (_, repo) => repo.listenable.removeListener(() {}), // Dispose listener if any
+          create: (_) => HiveUserWorkoutRepositoryImpl(
+            Hive.box<UserWorkout>('user_workouts'),
+          ),
         ),
         Provider<WorkoutSummaryRepository>(
-          create: (_) => WorkoutSummaryRepository(workoutSummariesBox),
-          dispose: (_, repo) => repo.listenable.removeListener(() {}), // Dispose listener if any
+          create: (_) => HiveWorkoutSummaryRepositoryImpl(
+            Hive.box<WorkoutSummary>('workout_summaries'),
+          ),
         ),
         Provider<AudioService>(
           create: (_) => AudioService(),

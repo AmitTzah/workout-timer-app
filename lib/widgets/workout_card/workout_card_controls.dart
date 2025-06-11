@@ -52,7 +52,7 @@ class WorkoutCardControls extends StatelessWidget {
                       levelSelections[workout.id] = selectedValue;
                       workout.selectedLevel = selectedValue;
                       await userWorkoutRepository
-                          .saveUserWorkout(workout);
+                          .saveWorkout(workout);
                       onSelectionsChanged();
                     }
                   },
@@ -70,7 +70,7 @@ class WorkoutCardControls extends StatelessWidget {
                     survivalModeSelections[workout.id] =
                         !currentValue;
                     workout.selectedSurvivalMode = !currentValue;
-                    userWorkoutRepository.saveUserWorkout(workout);
+                    userWorkoutRepository.saveWorkout(workout);
                     onSelectionsChanged();
                   },
                   icon: AnimatedSwitcher(

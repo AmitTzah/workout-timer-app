@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:workout_timer_app/services/database_service.dart';
+import 'package:provider/provider.dart';
 import 'package:workout_timer_app/widgets/workout_calendar.dart';
 import 'package:workout_timer_app/widgets/workout_event_list.dart';
 
@@ -28,12 +28,13 @@ class WorkoutCalendarScreenState extends State<WorkoutCalendarScreen> {
     super.initState();
     _selectedDay = _focusedDay;
     _events = {};
-    _initRepository();
+    // _initRepository(); // Removed as repository is now provided via Provider
   }
 
-  Future<void> _initRepository() async {
-    final summariesBox = await DatabaseService.openWorkoutSummariesBox();
-    _repository = WorkoutSummaryRepository(summariesBox);
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _repository = Provider.of<WorkoutSummaryRepository>(context, listen: false);
     setState(() {
       _summariesFuture = Future.value(_repository.getAllWorkoutSummaries());
     });
