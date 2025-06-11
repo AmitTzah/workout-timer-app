@@ -1,13 +1,13 @@
 import 'package:hive/hive.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import '../models/workout_item.dart';
+
 part 'exercise.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 @HiveType(typeId: 0)
-class Exercise extends HiveObject {
-  @HiveField(0)
-  String id; // Unique ID for reordering and persistence
+class Exercise extends WorkoutItem {
 
   @HiveField(1)
   String name;
@@ -28,7 +28,7 @@ class Exercise extends HiveObject {
   int? restTimeInSeconds;
 
   Exercise({
-    required this.id,
+    required super.id,
     required this.name,
     required this.sets,
     this.reps,

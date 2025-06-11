@@ -66,8 +66,7 @@ UserWorkout _$UserWorkoutFromJson(Map<String, dynamic> json) => UserWorkout(
       id: json['id'] as String,
       name: json['name'] as String,
       items: (json['items'] as List<dynamic>)
-          .map((e) =>
-              const WorkoutItemConverter().fromJson(e as Map<String, dynamic>))
+          .map((e) => const WorkoutItemConverter().fromJson(e as Object))
           .toList(),
       totalWorkoutTime: (json['totalWorkoutTime'] as num).toInt(),
       workoutType:

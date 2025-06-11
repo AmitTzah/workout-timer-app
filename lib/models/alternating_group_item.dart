@@ -1,7 +1,7 @@
 import 'package:hive/hive.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:workout_timer_app/models/exercise.dart';
-import 'package:workout_timer_app/models/workout_item.dart';
+import '../models/exercise.dart';
+import '../models/workout_item.dart';
 
 part 'alternating_group_item.g.dart';
 
@@ -31,7 +31,6 @@ class AlternatingGroupItem extends WorkoutItem {
   factory AlternatingGroupItem.fromJson(Map<String, dynamic> json) =>
       _$AlternatingGroupItemFromJson(json);
 
-  @override
   Map<String, dynamic> toJson() {
     return {
       'type': 'AlternatingGroupItem', // Indicate the concrete type

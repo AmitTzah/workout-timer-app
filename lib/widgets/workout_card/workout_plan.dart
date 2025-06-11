@@ -23,8 +23,8 @@ class WorkoutPlan extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         ...items.map((item) {
-          if (item is ExerciseItem) {
-            return _buildExerciseItem(item.exercise);
+          if (item is Exercise) {
+            return _buildExerciseItem(item);
           } else if (item is AlternatingGroupItem) {
             return _buildAlternatingGroupItem(item);
           } else if (item is RestBlockItem) {

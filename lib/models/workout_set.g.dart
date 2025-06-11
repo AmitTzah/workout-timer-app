@@ -17,28 +17,31 @@ class WorkoutSetAdapter extends TypeAdapter<WorkoutSet> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return WorkoutSet(
-      exercise: fields[0] as Exercise,
-      setNumber: fields[1] as int,
-      isRestSet: fields[2] as bool,
-      isRestBlock: fields[3] as bool,
-      restBlockDuration: fields[4] as int?,
+      exercise: fields[1] as Exercise,
+      setNumber: fields[2] as int,
+      isRestSet: fields[3] as bool,
+      isRestBlock: fields[4] as bool,
+      restBlockDuration: fields[5] as int?,
+      id: fields[0] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, WorkoutSet obj) {
     writer
-      ..writeByte(5)
-      ..writeByte(0)
-      ..write(obj.exercise)
+      ..writeByte(6)
       ..writeByte(1)
-      ..write(obj.setNumber)
+      ..write(obj.exercise)
       ..writeByte(2)
-      ..write(obj.isRestSet)
+      ..write(obj.setNumber)
       ..writeByte(3)
-      ..write(obj.isRestBlock)
+      ..write(obj.isRestSet)
       ..writeByte(4)
-      ..write(obj.restBlockDuration);
+      ..write(obj.isRestBlock)
+      ..writeByte(5)
+      ..write(obj.restBlockDuration)
+      ..writeByte(0)
+      ..write(obj.id);
   }
 
   @override
@@ -62,10 +65,12 @@ WorkoutSet _$WorkoutSetFromJson(Map<String, dynamic> json) => WorkoutSet(
       isRestSet: json['isRestSet'] as bool? ?? false,
       isRestBlock: json['isRestBlock'] as bool? ?? false,
       restBlockDuration: (json['restBlockDuration'] as num?)?.toInt(),
+      id: json['id'] as String,
     );
 
 Map<String, dynamic> _$WorkoutSetToJson(WorkoutSet instance) =>
     <String, dynamic>{
+      'id': instance.id,
       'exercise': instance.exercise.toJson(),
       'setNumber': instance.setNumber,
       'isRestSet': instance.isRestSet,

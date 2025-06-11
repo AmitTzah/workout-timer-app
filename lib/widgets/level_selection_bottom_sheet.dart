@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:workout_timer_app/models/user_workout.dart';
-import 'package:workout_timer_app/models/workout_item.dart';
 import 'package:workout_timer_app/models/alternating_group_item.dart';
 import 'package:workout_timer_app/models/workout_type.dart';
+import 'package:workout_timer_app/models/exercise.dart'; // Added import
 
 class LevelSelectionBottomSheet {
   static Future<dynamic> show(BuildContext context, dynamic currentLevel, UserWorkout workout) async {
@@ -17,8 +17,8 @@ class LevelSelectionBottomSheet {
             return sum + item.cycles;
           }
         } else {
-          if (item is ExerciseItem) {
-            return sum + item.exercise.sets;
+          if (item is Exercise) {
+            return sum + item.sets;
           }
         }
         return sum;

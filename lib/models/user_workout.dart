@@ -1,8 +1,8 @@
 import 'package:hive/hive.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:workout_timer_app/models/workout_item.dart';
-import 'package:workout_timer_app/models/workout_type.dart';
-import 'package:workout_timer_app/utils/workout_item_converter.dart';
+import '../models/workout_item.dart';
+import '../models/workout_type.dart';
+import '../utils/workout_item_converter.dart';
 
 part 'user_workout.g.dart';
 

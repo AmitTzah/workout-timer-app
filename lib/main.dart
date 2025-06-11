@@ -13,7 +13,6 @@ import 'package:workout_timer_app/models/workout_summary.dart'; // Import Workou
 import 'package:workout_timer_app/models/exercise.dart';
 import 'package:workout_timer_app/models/goal.dart';
 import 'package:workout_timer_app/models/workout_set.dart';
-import 'package:workout_timer_app/models/workout_item.dart';
 import 'package:workout_timer_app/models/workout_type.dart';
 import 'package:workout_timer_app/models/alternating_group_item.dart';
 import 'package:workout_timer_app/models/rest_block_item.dart';
@@ -25,7 +24,6 @@ void main() async {
   if (!Hive.isAdapterRegistered(0)) Hive.registerAdapter(ExerciseAdapter());
   if (!Hive.isAdapterRegistered(1)) Hive.registerAdapter(WorkoutSummaryAdapter());
   if (!Hive.isAdapterRegistered(2)) Hive.registerAdapter(UserWorkoutAdapter());
-  if (!Hive.isAdapterRegistered(3)) Hive.registerAdapter(ExerciseItemAdapter());
   if (!Hive.isAdapterRegistered(9)) Hive.registerAdapter(RestBlockItemAdapter());
   if (!Hive.isAdapterRegistered(5)) Hive.registerAdapter(GoalAdapter());
   if (!Hive.isAdapterRegistered(6)) Hive.registerAdapter(WorkoutSetAdapter());

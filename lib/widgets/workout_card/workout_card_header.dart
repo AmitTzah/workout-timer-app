@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:workout_timer_app/models/user_workout.dart';
 import 'package:workout_timer_app/models/workout_type.dart';
-import 'package:workout_timer_app/models/workout_item.dart';
 import 'package:workout_timer_app/models/alternating_group_item.dart';
+import 'package:workout_timer_app/models/exercise.dart'; // Added import
 
 class WorkoutCardHeader extends StatelessWidget {
   final UserWorkout workout;
@@ -25,8 +25,8 @@ class WorkoutCardHeader extends StatelessWidget {
     int totalSetsOrCycles = 0;
     if (workoutType == WorkoutType.sequential) {
       totalSetsOrCycles = workout.items
-          .whereType<ExerciseItem>()
-          .fold(0, (sum, item) => sum + item.exercise.sets);
+          .whereType<Exercise>()
+          .fold(0, (sum, item) => sum + item.sets);
     } else if (workoutType == WorkoutType.alternating) {
       totalSetsOrCycles = workout.items
           .whereType<AlternatingGroupItem>()

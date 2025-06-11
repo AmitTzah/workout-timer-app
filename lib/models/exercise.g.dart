@@ -31,8 +31,6 @@ class ExerciseAdapter extends TypeAdapter<Exercise> {
   void write(BinaryWriter writer, Exercise obj) {
     writer
       ..writeByte(7)
-      ..writeByte(0)
-      ..write(obj.id)
       ..writeByte(1)
       ..write(obj.name)
       ..writeByte(2)
@@ -44,7 +42,9 @@ class ExerciseAdapter extends TypeAdapter<Exercise> {
       ..writeByte(5)
       ..write(obj.workTimeInSeconds)
       ..writeByte(6)
-      ..write(obj.restTimeInSeconds);
+      ..write(obj.restTimeInSeconds)
+      ..writeByte(0)
+      ..write(obj.id);
   }
 
   @override

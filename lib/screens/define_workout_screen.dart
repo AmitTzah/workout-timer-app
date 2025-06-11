@@ -84,7 +84,7 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
       setState(() {
         if (_workoutType == WorkoutType.sequential) {
           _workoutItems.add(
-            ExerciseItem(id: const Uuid().v4(), exercise: newExercise),
+            newExercise,
           );
         } else {
           AlternatingGroupItem? lastGroup;
@@ -188,8 +188,8 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
   void _editWorkoutItem(int index) {
     final WorkoutItem itemToEdit = _workoutItems[index];
 
-    if (itemToEdit is ExerciseItem) {
-      final Exercise exerciseToEdit = itemToEdit.exercise;
+    if (itemToEdit is Exercise) {
+      final Exercise exerciseToEdit = itemToEdit;
       final TextEditingController setsController = TextEditingController(
         text: exerciseToEdit.sets.toString(),
       );
@@ -286,17 +286,14 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
                       newWorkTime != null &&
                       newWorkTime > 0) {
                     setState(() {
-                      _workoutItems[index] = ExerciseItem(
+                      _workoutItems[index] = Exercise(
                         id: exerciseToEdit.id, // Pass existing ID
-                        exercise: Exercise(
-                          id: exerciseToEdit.id, // Pass existing ID
-                          name: selectedExerciseName,
-                          sets: newSets,
-                          reps: newReps,
-                          workTimeInSeconds: newWorkTime,
-                          restTimeInSeconds: newRestTime,
-                          audioFileName: exerciseToEdit.audioFileName,
-                        ),
+                        name: selectedExerciseName,
+                        sets: newSets,
+                        reps: newReps,
+                        workTimeInSeconds: newWorkTime,
+                        restTimeInSeconds: newRestTime,
+                        audioFileName: exerciseToEdit.audioFileName,
                       );
                     });
                     Navigator.of(context).pop();
@@ -502,11 +499,11 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
   int _calculateTotalDuration() {
     int totalDuration = 0;
     for (var item in _workoutItems) {
-      if (item is ExerciseItem) {
-        totalDuration += item.exercise.sets * item.exercise.workTimeInSeconds;
-        if (item.exercise.restTimeInSeconds != null && item.exercise.sets > 1) {
+      if (item is Exercise) {
+        totalDuration += item.sets * item.workTimeInSeconds;
+        if (item.restTimeInSeconds != null && item.sets > 1) {
           totalDuration +=
-              (item.exercise.sets - 1) * item.exercise.restTimeInSeconds!;
+              (item.sets - 1) * item.restTimeInSeconds!;
         }
       } else if (item is RestBlockItem) {
         totalDuration += item.durationInSeconds;

@@ -1,7 +1,9 @@
 import 'package:hive/hive.dart';
+import 'package:json_annotation/json_annotation.dart';
 
 part 'goal.g.dart';
 
+@JsonSerializable()
 @HiveType(typeId: 5) // Changed typeId to 5
 class Goal extends HiveObject {
   @HiveField(0)
@@ -18,4 +20,7 @@ class Goal extends HiveObject {
     required this.targetDate,
     this.progress = 0.0,
   });
+
+  factory Goal.fromJson(Map<String, dynamic> json) => _$GoalFromJson(json);
+  Map<String, dynamic> toJson() => _$GoalToJson(this);
 }

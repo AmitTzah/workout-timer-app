@@ -2,7 +2,7 @@ import 'package:workout_timer_app/models/user_workout.dart';
 import 'package:workout_timer_app/models/exercise.dart'; // Still needed for Exercise object within WorkoutSet
 import 'package:workout_timer_app/models/workout_set.dart';
 import 'package:uuid/uuid.dart'; // Import Uuid
-import 'package:workout_timer_app/models/workout_item.dart'; // New: Import WorkoutItem
+// New: Import WorkoutItem
 import 'package:workout_timer_app/models/alternating_group_item.dart'; // Import AlternatingGroupItem
 import 'package:workout_timer_app/models/rest_block_item.dart'; // Import RestBlockItem
 
@@ -71,13 +71,14 @@ class WorkoutLogicService {
     if (_workoutType == WorkoutType.sequential) {
       // Sequential Mode
       for (var item in _baseWorkout.items) {
-        if (item is ExerciseItem) {
+        if (item is Exercise) {
           final adjustedExercise = _applyLevelModifier([
             item,
           ]).first; // Apply level modifier to single exercise
           for (int s = 1; s <= adjustedExercise.sets; s++) {
             workoutPlan.add(
               WorkoutSet(
+                id: const Uuid().v4(), // Added id
                 exercise: adjustedExercise,
                 setNumber: s,
                 isRestSet: false,
@@ -90,6 +91,7 @@ class WorkoutLogicService {
                 s < adjustedExercise.sets) {
               workoutPlan.add(
                 WorkoutSet(
+                  id: const Uuid().v4(), // Added id
                   exercise: adjustedExercise,
                   setNumber: s,
                   isRestSet: true,
@@ -102,6 +104,7 @@ class WorkoutLogicService {
         } else if (item is RestBlockItem) {
           workoutPlan.add(
             WorkoutSet(
+              id: const Uuid().v4(), // Added id
               exercise: Exercise(
                 id: item.id,
                 name: 'Rest Block',
@@ -128,6 +131,7 @@ class WorkoutLogicService {
               // Add work set
               workoutPlan.add(
                 WorkoutSet(
+                  id: const Uuid().v4(), // Added id
                   exercise: exercise,
                   setNumber: cycle + 1, // Cycle number as set number
                   isRestSet: false,
@@ -139,6 +143,7 @@ class WorkoutLogicService {
                   exercise.restTimeInSeconds! > 0) {
                 workoutPlan.add(
                   WorkoutSet(
+                    id: const Uuid().v4(), // Added id
                     exercise: exercise,
                     setNumber: cycle + 1,
                     isRestSet: true,
@@ -154,6 +159,7 @@ class WorkoutLogicService {
                 cycle < adjustedCycles - 1) {
               workoutPlan.add(
                 WorkoutSet(
+                  id: const Uuid().v4(), // Added id
                   exercise: Exercise(
                     id: const Uuid().v4(),
                     name: 'Group Rest',
@@ -172,6 +178,7 @@ class WorkoutLogicService {
           // Rest blocks are added directly at their position in the main plan
           workoutPlan.add(
             WorkoutSet(
+              id: const Uuid().v4(), // Added id
               exercise: Exercise(
                 id: item.id,
                 name: 'Rest Block',
@@ -215,18 +222,18 @@ class WorkoutLogicService {
   }
 
   /// Applies level modifiers to the workout exercises for sequential mode.
-  List<Exercise> _applyLevelModifier(List<ExerciseItem> originalExerciseItems) {
+  List<Exercise> _applyLevelModifier(List<Exercise> originalExercises) {
     List<Exercise> adjustedExercises = [];
     if (_selectedLevelOrMode is int &&
         _selectedLevelOrMode >= 1 &&
         _selectedLevelOrMode <= 10) {
       final int level = _selectedLevelOrMode;
-      int originalTotalSets = originalExerciseItems.fold(
+      int originalTotalSets = originalExercises.fold(
         0,
-        (sum, item) => sum + item.exercise.sets,
+        (sum, item) => sum + item.sets,
       );
       if (originalTotalSets == 0) {
-        return originalExerciseItems.map((e) => e.exercise).toList();
+        return originalExercises.toList();
       }
 
       int targetTotalSets = _calculateTotalSetsForLevelStatic(
@@ -237,8 +244,7 @@ class WorkoutLogicService {
       int currentSumOfAdjustedSets = 0;
       List<Exercise> tempAdjustedExercises = [];
 
-      for (var item in originalExerciseItems) {
-        final exercise = item.exercise;
+      for (var exercise in originalExercises) {
         double proportion = exercise.sets / originalTotalSets;
         int adjustedSets = (proportion * targetTotalSets).round();
 
@@ -284,7 +290,7 @@ class WorkoutLogicService {
       }
       adjustedExercises = tempAdjustedExercises;
     } else {
-      adjustedExercises = originalExerciseItems.map((e) => e.exercise).toList();
+      adjustedExercises = originalExercises.toList();
     }
     return adjustedExercises;
   }
