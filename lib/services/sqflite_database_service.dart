@@ -11,11 +11,14 @@ class SqfliteDatabaseService {
 
   SqfliteDatabaseService._internal();
 
-  Future<Database> get database async {
-    if (_database != null) {
-      return _database!;
-    }
+  Future<void> init() async {
     _database = await _initDatabase();
+  }
+
+  Future<Database> get database async {
+    if (_database == null) {
+      await init();
+    }
     return _database!;
   }
 
@@ -23,7 +26,7 @@ class SqfliteDatabaseService {
     String path = join(await getDatabasesPath(), 'exercise_timer_app.db');
     return await openDatabase(
       path,
-      version: 1,
+      version: 3,
       onCreate: _onCreate,
     );
   }
@@ -52,7 +55,8 @@ class SqfliteDatabaseService {
         isSurvivalMode INTEGER NOT NULL,
         workoutType TEXT NOT NULL,
         wasStoppedPrematurely INTEGER NOT NULL,
-        totalSets INTEGER NOT NULL
+        totalSets INTEGER NOT NULL,
+        completionDetails TEXT NOT NULL
       )
     ''');
   }

@@ -26,13 +26,15 @@ class WorkoutSummaryAdapter extends TypeAdapter<WorkoutSummary> {
       workoutType: fields[6] as WorkoutType,
       wasStoppedPrematurely: fields[7] == null ? false : fields[7] as bool,
       totalSets: fields[8] as int,
+      completionDetails: fields[9] as WorkoutCompletionDetails?,
+      id: fields[10] as int?,
     );
   }
 
   @override
   void write(BinaryWriter writer, WorkoutSummary obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.date)
       ..writeByte(1)
@@ -50,7 +52,11 @@ class WorkoutSummaryAdapter extends TypeAdapter<WorkoutSummary> {
       ..writeByte(7)
       ..write(obj.wasStoppedPrematurely)
       ..writeByte(8)
-      ..write(obj.totalSets);
+      ..write(obj.totalSets)
+      ..writeByte(9)
+      ..write(obj.completionDetails)
+      ..writeByte(10)
+      ..write(obj.id);
   }
 
   @override
@@ -71,29 +77,33 @@ class WorkoutSummaryAdapter extends TypeAdapter<WorkoutSummary> {
 WorkoutSummary _$WorkoutSummaryFromJson(Map<String, dynamic> json) =>
     WorkoutSummary(
       date: DateTime.parse(json['date'] as String),
-      performedSets: (json['performedSets'] as List<dynamic>)
-          .map((e) => WorkoutSet.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      performedSets: _performedSetsFromJson(json['performedSets'] as String),
       totalDurationInSeconds: (json['totalDurationInSeconds'] as num).toInt(),
       workoutName: json['workoutName'] as String,
       workoutLevel: (json['workoutLevel'] as num).toInt(),
-      isSurvivalMode: json['isSurvivalMode'] as bool,
+      isSurvivalMode: _boolFromInt((json['isSurvivalMode'] as num).toInt()),
       workoutType: $enumDecode(_$WorkoutTypeEnumMap, json['workoutType']),
-      wasStoppedPrematurely: json['wasStoppedPrematurely'] as bool,
+      wasStoppedPrematurely:
+          _boolFromInt((json['wasStoppedPrematurely'] as num).toInt()),
       totalSets: (json['totalSets'] as num).toInt(),
+      completionDetails:
+          _completionDetailsFromJson(json['completionDetails'] as String?),
+      id: (json['id'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$WorkoutSummaryToJson(WorkoutSummary instance) =>
     <String, dynamic>{
       'date': instance.date.toIso8601String(),
-      'performedSets': instance.performedSets.map((e) => e.toJson()).toList(),
+      'performedSets': _performedSetsToJson(instance.performedSets),
       'totalDurationInSeconds': instance.totalDurationInSeconds,
       'workoutName': instance.workoutName,
       'workoutLevel': instance.workoutLevel,
-      'isSurvivalMode': instance.isSurvivalMode,
+      'isSurvivalMode': _boolToInt(instance.isSurvivalMode),
       'workoutType': _$WorkoutTypeEnumMap[instance.workoutType]!,
-      'wasStoppedPrematurely': instance.wasStoppedPrematurely,
+      'wasStoppedPrematurely': _boolToInt(instance.wasStoppedPrematurely),
       'totalSets': instance.totalSets,
+      'completionDetails': _completionDetailsToJson(instance.completionDetails),
+      'id': instance.id,
     };
 
 const _$WorkoutTypeEnumMap = {

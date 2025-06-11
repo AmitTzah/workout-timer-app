@@ -318,6 +318,7 @@ class WorkoutController extends ChangeNotifier {
   WorkoutSummary _createWorkoutSummary(WorkoutCompletionDetails details) {
     return WorkoutSummary(
       date: _workoutStartTime!,
+      completionDetails: details,
       performedSets: details.finalPerformedSets,
       totalDurationInSeconds: (_currentRawTimeMs / 1000.0).round(),
       workoutName: _workout.name,

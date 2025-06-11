@@ -1,51 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-// Import Hive
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:workout_timer_app/screens/app_navigator.dart';
 import 'package:workout_timer_app/repositories/user_workout_repository.dart';
 import 'package:workout_timer_app/repositories/workout_summary_repository.dart';
-import 'package:workout_timer_app/repositories/hive/hive_user_workout_repository_impl.dart';
-import 'package:workout_timer_app/repositories/hive/hive_workout_summary_repository_impl.dart';
+import 'package:workout_timer_app/repositories/sqflite/sqflite_user_workout_repository_impl.dart';
+import 'package:workout_timer_app/repositories/sqflite/sqflite_workout_summary_repository_impl.dart';
 import 'package:workout_timer_app/services/audio_service.dart';
-import 'package:workout_timer_app/models/user_workout.dart'; // Import UserWorkout
-import 'package:workout_timer_app/models/workout_summary.dart'; // Import WorkoutSummary
-import 'package:workout_timer_app/models/exercise.dart';
-import 'package:workout_timer_app/models/goal.dart';
-import 'package:workout_timer_app/models/workout_set.dart';
-import 'package:workout_timer_app/models/workout_type.dart';
-import 'package:workout_timer_app/models/alternating_group_item.dart';
-import 'package:workout_timer_app/models/rest_block_item.dart';
+import 'package:workout_timer_app/services/sqflite_database_service.dart'; // Import SqfliteDatabaseService
+// Import UserWorkout
+// Import WorkoutSummary
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Hive.initFlutter();
-
-  if (!Hive.isAdapterRegistered(0)) Hive.registerAdapter(ExerciseAdapter());
-  if (!Hive.isAdapterRegistered(1)) Hive.registerAdapter(WorkoutSummaryAdapter());
-  if (!Hive.isAdapterRegistered(2)) Hive.registerAdapter(UserWorkoutAdapter());
-  if (!Hive.isAdapterRegistered(9)) Hive.registerAdapter(RestBlockItemAdapter());
-  if (!Hive.isAdapterRegistered(5)) Hive.registerAdapter(GoalAdapter());
-  if (!Hive.isAdapterRegistered(6)) Hive.registerAdapter(WorkoutSetAdapter());
-  if (!Hive.isAdapterRegistered(7)) Hive.registerAdapter(WorkoutTypeAdapter());
-  if (!Hive.isAdapterRegistered(8)) Hive.registerAdapter(AlternatingGroupItemAdapter());
-
-  // Open Hive boxes
-  await Hive.openBox<UserWorkout>('user_workouts');
-  await Hive.openBox<WorkoutSummary>('workout_summaries');
+  final sqfliteService = SqfliteDatabaseService(); // Instantiate SqfliteDatabaseService
+  await sqfliteService.init(); // Initialize the database
 
   runApp(
     MultiProvider(
       providers: [
         Provider<UserWorkoutRepository>(
-          create: (_) => HiveUserWorkoutRepositoryImpl(
-            Hive.box<UserWorkout>('user_workouts'),
-          ),
+          create: (_) => SqfliteUserWorkoutRepositoryImpl(sqfliteService),
         ),
         Provider<WorkoutSummaryRepository>(
-          create: (_) => HiveWorkoutSummaryRepositoryImpl(
-            Hive.box<WorkoutSummary>('workout_summaries'),
-          ),
+          create: (_) => SqfliteWorkoutSummaryRepositoryImpl(sqfliteService),
         ),
         Provider<AudioService>(
           create: (_) => AudioService(),

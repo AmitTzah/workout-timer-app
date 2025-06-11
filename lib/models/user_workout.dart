@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+import 'dart:convert';
 import 'package:json_annotation/json_annotation.dart';
 import '../models/workout_item.dart';
 import '../models/workout_type.dart';
@@ -16,8 +17,8 @@ class UserWorkout extends HiveObject {
   String name;
 
   @HiveField(2)
-  @WorkoutItemConverter() // Apply the custom converter
-  List<WorkoutItem> items; // Changed from List<Exercise> to List<WorkoutItem>
+  @JsonKey(toJson: _workoutItemListToJson, fromJson: _workoutItemListFromJson)
+  List<WorkoutItem> items;
 
   @HiveField(3)
   int totalWorkoutTime; // in seconds
@@ -44,4 +45,19 @@ class UserWorkout extends HiveObject {
   factory UserWorkout.fromJson(Map<String, dynamic> json) =>
       _$UserWorkoutFromJson(json);
   Map<String, dynamic> toJson() => _$UserWorkoutToJson(this);
+
+  static String _workoutItemListToJson(List<WorkoutItem> items) {
+    final converter = WorkoutItemConverter();
+    final List<Map<String, dynamic>> jsonList =
+        items.map((item) => converter.toJson(item) as Map<String, dynamic>).toList();
+    return jsonEncode(jsonList);
+  }
+
+  static List<WorkoutItem> _workoutItemListFromJson(String jsonString) {
+    final converter = WorkoutItemConverter();
+    final List<dynamic> decodedList = jsonDecode(jsonString) as List<dynamic>;
+    return decodedList
+        .map((itemJson) => converter.fromJson(itemJson as Object))
+        .toList();
+  }
 }

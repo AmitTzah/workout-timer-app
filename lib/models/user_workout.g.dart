@@ -65,9 +65,7 @@ class UserWorkoutAdapter extends TypeAdapter<UserWorkout> {
 UserWorkout _$UserWorkoutFromJson(Map<String, dynamic> json) => UserWorkout(
       id: json['id'] as String,
       name: json['name'] as String,
-      items: (json['items'] as List<dynamic>)
-          .map((e) => const WorkoutItemConverter().fromJson(e as Object))
-          .toList(),
+      items: UserWorkout._workoutItemListFromJson(json['items'] as String),
       totalWorkoutTime: (json['totalWorkoutTime'] as num).toInt(),
       workoutType:
           $enumDecodeNullable(_$WorkoutTypeEnumMap, json['workoutType']) ??
@@ -80,7 +78,7 @@ Map<String, dynamic> _$UserWorkoutToJson(UserWorkout instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
-      'items': instance.items.map(const WorkoutItemConverter().toJson).toList(),
+      'items': UserWorkout._workoutItemListToJson(instance.items),
       'totalWorkoutTime': instance.totalWorkoutTime,
       'workoutType': _$WorkoutTypeEnumMap[instance.workoutType]!,
       'selectedLevel': instance.selectedLevel,

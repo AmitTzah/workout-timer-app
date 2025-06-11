@@ -31,14 +31,5 @@ class AlternatingGroupItem extends WorkoutItem {
   factory AlternatingGroupItem.fromJson(Map<String, dynamic> json) =>
       _$AlternatingGroupItemFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    return {
-      'type': 'AlternatingGroupItem', // Indicate the concrete type
-      'id': id,
-      'name': name,
-      'cycles': cycles,
-      'groupRestInSeconds': groupRestInSeconds,
-      'exercises': exercises.map((e) => e.toJson()).toList(),
-    };
-  }
+  Map<String, dynamic> toJson() => _$AlternatingGroupItemToJson(this);
 }

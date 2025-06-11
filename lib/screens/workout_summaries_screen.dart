@@ -18,7 +18,6 @@ class WorkoutSummariesScreen extends StatefulWidget {
 class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
   late WorkoutSummaryRepository _workoutSummaryRepository;
   final ScrollController _scrollController = ScrollController();
-  final Map<dynamic, GlobalKey> _summaryKeys = {};
   String? _expandedWorkoutName;
   late Map<String, List<WorkoutSummary>> _groupedSummaries;
 
@@ -69,16 +68,6 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
     );
   }
 
-  void _scrollToSummary(WorkoutSummary summary) {
-    final key = _summaryKeys[summary.key];
-    if (key != null && key.currentContext != null) {
-      Scrollable.ensureVisible(
-        key.currentContext!,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-      );
-    }
-  }
 
   Map<String, List<WorkoutSummary>> _groupSummaries(
     List<WorkoutSummary> summaries,
@@ -99,9 +88,8 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
   }
 
   Widget _buildSummaryDetails(WorkoutSummary summary) {
-    final key = _summaryKeys.putIfAbsent(summary.key, () => GlobalKey());
     return Dismissible(
-      key: key,
+      key: ValueKey('${summary.workoutName}-${summary.date.toIso8601String()}'), // Assign a truly unique key
       direction: DismissDirection.endToStart,
       background: Container(
         color: Colors.red,
@@ -177,6 +165,7 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
                       : Theme.of(context).textTheme.bodyLarge;
 
                   return Padding(
+                    key: ValueKey(workoutSet.id), // Add unique key here
                     padding: const EdgeInsets.only(left: 16.0, bottom: 8.0),
                     child: Text(content, style: style),
                   );
@@ -240,12 +229,6 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
                   ),
             );
 
-          // Scroll to highlighted summary after data is loaded
-          if (widget.highlightedSummary != null && _summaryKeys.isNotEmpty) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _scrollToSummary(widget.highlightedSummary!);
-            });
-          }
 
           return ListView.builder(
             controller: _scrollController,
@@ -256,7 +239,7 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
               return Card(
                 margin: const EdgeInsets.all(8.0),
                 child: ExpansionTile(
-                  key: GlobalKey(), // Add a key to preserve state
+                  key: ValueKey(workoutName),
                   initiallyExpanded: workoutName == _expandedWorkoutName,
                   onExpansionChanged: (isExpanded) {
                     setState(() {

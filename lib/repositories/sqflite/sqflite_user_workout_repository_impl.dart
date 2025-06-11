@@ -9,6 +9,8 @@ class SqfliteUserWorkoutRepositoryImpl implements UserWorkoutRepository {
   final SqfliteDatabaseService _databaseService;
   final String _tableName = 'user_workouts';
 
+  final _workoutsStreamController = StreamController<List<UserWorkout>>.broadcast();
+
   SqfliteUserWorkoutRepositoryImpl(this._databaseService);
 
   @override
@@ -34,6 +36,11 @@ class SqfliteUserWorkoutRepositoryImpl implements UserWorkoutRepository {
     return null;
   }
 
+  Future<void> _updateWorkoutsStream() async {
+    final workouts = await getAllWorkouts();
+    _workoutsStreamController.add(workouts);
+  }
+
   @override
   Future<void> saveWorkout(UserWorkout workout) async {
     final db = await _databaseService.database;
@@ -42,6 +49,7 @@ class SqfliteUserWorkoutRepositoryImpl implements UserWorkoutRepository {
       workout.toJson(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    await _updateWorkoutsStream();
   }
 
   @override
@@ -52,16 +60,19 @@ class SqfliteUserWorkoutRepositoryImpl implements UserWorkoutRepository {
       where: 'id = ?',
       whereArgs: [id],
     );
+    await _updateWorkoutsStream();
   }
 
   @override
-  Stream<List<UserWorkout>> watchAllWorkouts() async* {
-    yield await getAllWorkouts();
+  Stream<List<UserWorkout>> watchAllWorkouts() {
+    _updateWorkoutsStream(); // Initial data push
+    return _workoutsStreamController.stream;
   }
 
   @override
   Future<void> clearAllWorkouts() async {
     final db = await _databaseService.database;
     await db.delete(_tableName);
+    await _updateWorkoutsStream();
   }
 }
