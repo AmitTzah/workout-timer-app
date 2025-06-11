@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart'; // For debugPrint
+import 'package:intl/intl.dart';
 import 'package:workout_timer_app/models/backup_data.dart';
 import 'package:workout_timer_app/repositories/user_workout_repository.dart';
 import 'package:workout_timer_app/repositories/workout_summary_repository.dart';
@@ -26,9 +27,14 @@ class BackupService {
       final jsonString = jsonEncode(backupData.toJson());
       final Uint8List fileBytes = utf8.encode(jsonString); // Convert String to Uint8List
 
+      final now = DateTime.now();
+      final formatter = DateFormat('yyyy-MM-dd');
+      final String formattedDate = formatter.format(now);
+      final String newFileName = 'workout_timer_app_backup_$formattedDate.json';
+
       String? outputFile = await FilePicker.platform.saveFile(
         dialogTitle: 'Save Workout Data Backup',
-        fileName: 'workout_backup.json',
+        fileName: newFileName,
         type: FileType.custom,
         allowedExtensions: ['json'],
         bytes: fileBytes, // Provide the bytes directly
