@@ -36,9 +36,24 @@ This document outlines a 4-step migration plan to replace the Hive database with
           Future<UserWorkout?> getWorkoutById(String id);
           Future<void> saveWorkout(UserWorkout workout);
           Future<void> deleteWorkout(String id);
+          Stream<List<UserWorkout>> watchAllWorkouts();
+          Future<void> clearAllWorkouts();
         }
         ```
-        *   Do the same for `lib/repositories/workout_summary_repository.dart`, paying special attention to replacing the Hive-specific `ValueListenable<Box<...>>` with a generic `Stream`.
+        *   In `lib/repositories/workout_summary_repository.dart`, define the abstract class:
+
+        ```dart
+        // lib/repositories/workout_summary_repository.dart
+        import 'package:workout_timer_app/models/workout_summary.dart';
+
+        abstract class WorkoutSummaryRepository {
+          Future<void> saveWorkoutSummary(WorkoutSummary summary);
+          Future<List<WorkoutSummary>> getAllWorkoutSummaries();
+          Future<void> deleteWorkoutSummary(int key);
+          Future<void> clearAllWorkoutSummaries();
+          Stream<List<WorkoutSummary>> watchAllWorkoutSummaries();
+        }
+        ```
 
     3.  **Create Hive Implementations:**
         *   Create a new directory: `lib/repositories/hive/`.
@@ -84,6 +99,29 @@ This document outlines a 4-step migration plan to replace the Hive database with
           child: const MyApp(),
         ),
         ```
+
+    5.  **A Note on Reactive Streams (`async*`):**
+        *   During the refactor, the `watch` methods in the repositories were updated to use an `async*` generator.
+        *   **Why?** A simple `.map()` on the Hive stream would only emit a new list when the data *changes*. It would not provide an initial value, leading to infinite loading spinners in the UI if the stream was used in a `StreamBuilder` before any data had been emitted.
+        *   The `async*` pattern solves this by allowing us to `yield` the current state of the data immediately upon listening, and then continue to `yield` subsequent updates from the underlying Hive stream.
+
+        ```dart
+        // Example from HiveUserWorkoutRepositoryImpl
+        @override
+        Stream<List<UserWorkout>> watchAllWorkouts() async* {
+          // Yield the initial data right away
+          yield _workoutBox.values.toList();
+          // Then yield subsequent changes
+          yield* _workoutBox.watch().map((_) => _workoutBox.values.toList());
+        }
+        ```
+
+*   **Current Status (As of end of Step 1):**
+    *   The data layer has been successfully decoupled from the UI and business logic via abstract repositories.
+    *   All Hive-specific logic is now confined to the `lib/repositories/hive/` directory and the initialization code in `lib/main.dart`.
+    *   The application is fully functional and uses the Hive implementation through the new abstraction layer.
+    *   The `DatabaseService` was removed, and its initialization logic was migrated directly into `main.dart` for simplicity.
+    *   The default widget test (`test/widget_test.dart`) was removed as it was no longer relevant.
 
 *   **Git Commit Message:**
     ```
