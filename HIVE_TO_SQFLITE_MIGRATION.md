@@ -146,7 +146,7 @@ This document outlines a 4-step migration plan to replace the Hive database with
     1.  **Add Model Serialization:**
         *   Open model files like `lib/models/user_workout.dart`.
         *   Ensure they have `toJson` and `factory fromJson` methods, likely using `json_serializable`.
-        *   For nested objects (e.g., `List<Exercise>` within `UserWorkout`), you will need a `JsonConverter` to store them as a single JSON string in the database.
+        *   For nested objects (e.g., `List<WorkoutItem>` within `UserWorkout`), you will need a `JsonConverter` to store them as a single JSON string in the database.
         *   Run `flutter pub run build_runner build --delete-conflicting-outputs` to generate the serialization code.
 
     2.  **Create SQFlite Service:**
@@ -216,6 +216,18 @@ This document outlines a 4-step migration plan to replace the Hive database with
         }
         ```
         *   Repeat for `SqfliteWorkoutSummaryRepositoryImpl`.
+
+*   **Notes on Implementation:**
+    *   A significant challenge was the conflict between `hive_generator` and `json_serializable`. The models could not `extend HiveObject` and also be correctly processed by `json_serializable`. The solution was to remove `extends HiveObject` from the model hierarchy (`WorkoutItem` and its subclasses) and rely only on the `@HiveType` and `@HiveField` annotations for the Hive generation, which resolved the build conflicts.
+    *   The `UserWorkout` model's `List<WorkoutItem>` field required a custom `JsonConverter` (`WorkoutItemConverter`) to handle the polymorphic nature of the list, as `WorkoutItem` is an abstract class with multiple concrete implementations.
+    *   The `build_runner` initially failed because the abstract class `WorkoutItem` was incorrectly annotated with `@JsonSerializable` and contained a `part` directive. These were removed, as abstract classes intended only for inheritance should not be directly serializable.
+    *   After the refactoring, a `HiveError` on startup indicated a conflict with stale data in the Hive box. This was resolved by running `flutter clean` and performing a fresh install of the application to clear the old database file.
+
+*   **Current Status (As of end of Step 2):**
+    *   The full SQFlite persistence layer has been implemented in `lib/repositories/sqflite/`.
+    *   The data models are now fully serializable to and from JSON.
+    *   The application remains fully functional, still using the Hive implementation, with no breaking changes to the UI or business logic.
+    *   The codebase is clean of any build errors or warnings.
 
 *   **Git Commit Message:**
     ```
