@@ -100,7 +100,7 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
       confirmDismiss: (direction) =>
           _confirmDismiss(context, summary.workoutName),
       onDismissed: (direction) {
-        _workoutSummaryRepository.deleteWorkoutSummary(summary.key);
+        _workoutSummaryRepository.deleteWorkoutSummary(summary.id!);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(

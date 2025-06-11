@@ -3,59 +3,6 @@
 part of 'workout_set.dart';
 
 // **************************************************************************
-// TypeAdapterGenerator
-// **************************************************************************
-
-class WorkoutSetAdapter extends TypeAdapter<WorkoutSet> {
-  @override
-  final int typeId = 6;
-
-  @override
-  WorkoutSet read(BinaryReader reader) {
-    final numOfFields = reader.readByte();
-    final fields = <int, dynamic>{
-      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
-    };
-    return WorkoutSet(
-      exercise: fields[1] as Exercise,
-      setNumber: fields[2] as int,
-      isRestSet: fields[3] as bool,
-      isRestBlock: fields[4] as bool,
-      restBlockDuration: fields[5] as int?,
-      id: fields[0] as String,
-    );
-  }
-
-  @override
-  void write(BinaryWriter writer, WorkoutSet obj) {
-    writer
-      ..writeByte(6)
-      ..writeByte(1)
-      ..write(obj.exercise)
-      ..writeByte(2)
-      ..write(obj.setNumber)
-      ..writeByte(3)
-      ..write(obj.isRestSet)
-      ..writeByte(4)
-      ..write(obj.isRestBlock)
-      ..writeByte(5)
-      ..write(obj.restBlockDuration)
-      ..writeByte(0)
-      ..write(obj.id);
-  }
-
-  @override
-  int get hashCode => typeId.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is WorkoutSetAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
-}
-
-// **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 

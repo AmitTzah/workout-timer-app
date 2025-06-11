@@ -1,4 +1,3 @@
-import 'package:hive/hive.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import '../models/workout_item.dart';
@@ -6,25 +5,18 @@ import '../models/workout_item.dart';
 part 'exercise.g.dart';
 
 @JsonSerializable(explicitToJson: true)
-@HiveType(typeId: 0)
 class Exercise extends WorkoutItem {
 
-  @HiveField(1)
   String name;
 
-  @HiveField(2)
   int sets;
 
-  @HiveField(3) // New field for reps
   int? reps; // Reps can be optional
 
-  @HiveField(4) // New field for custom audio file name
   String? audioFileName; // Optional: custom audio file for this exercise
 
-  @HiveField(5) // New field for work time per set
   int workTimeInSeconds;
 
-  @HiveField(6) // New field for rest time after each set (optional)
   int? restTimeInSeconds;
 
   Exercise({

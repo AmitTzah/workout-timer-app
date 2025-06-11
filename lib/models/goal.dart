@@ -1,18 +1,13 @@
-import 'package:hive/hive.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'goal.g.dart';
 
 @JsonSerializable()
-@HiveType(typeId: 5) // Changed typeId to 5
-class Goal extends HiveObject {
-  @HiveField(0)
+class Goal {
   String description;
 
-  @HiveField(1)
   DateTime targetDate;
 
-  @HiveField(2)
   double progress; // e.g., 0.0 to 1.0 or specific value
 
   Goal({

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:hive/hive.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:workout_timer_app/models/workout_set.dart';
 import 'package:workout_timer_app/models/workout_completion_details.dart';
@@ -8,43 +7,31 @@ import 'package:workout_timer_app/models/workout_type.dart';
 part 'workout_summary.g.dart';
 
 @JsonSerializable(explicitToJson: true)
-@HiveType(typeId: 1)
-class WorkoutSummary extends HiveObject {
-  @HiveField(0)
+class WorkoutSummary {
   DateTime date;
 
-  @HiveField(1)
   @JsonKey(fromJson: _performedSetsFromJson, toJson: _performedSetsToJson)
   List<WorkoutSet> performedSets; // Changed from exercises to performedSets
 
-  @HiveField(2)
   int totalDurationInSeconds;
 
-  @HiveField(3, defaultValue: '')
   String workoutName;
 
-  @HiveField(4, defaultValue: 1) // Default level to 1
   int workoutLevel;
 
-  @HiveField(5, defaultValue: false)
   @JsonKey(fromJson: _boolFromInt, toJson: _boolToInt)
   bool isSurvivalMode;
 
-  @HiveField(6)
   WorkoutType workoutType;
 
-  @HiveField(7, defaultValue: false) // New field for whether workout was stopped prematurely
   @JsonKey(fromJson: _boolFromInt, toJson: _boolToInt)
   bool wasStoppedPrematurely;
 
-  @HiveField(8) // Re-using field 8
   int totalSets;
 
-  @HiveField(9)
   @JsonKey(fromJson: _completionDetailsFromJson, toJson: _completionDetailsToJson)
   WorkoutCompletionDetails? completionDetails;
 
- @HiveField(10)
  int? id; // New field for SQFlite primary key
 
  WorkoutSummary({
