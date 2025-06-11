@@ -604,6 +604,7 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
         items: _workoutItems,
         totalWorkoutTime: totalDuration,
         workoutType: _workoutType,
+        selectedSurvivalMode: false, // Initialize with a default value
       );
 
       developer.log('[_saveWorkout] UserWorkout object created: id=$_workoutId, name=$workoutName, totalDuration=$totalDuration, workoutType=${_workoutType.name}, itemsCount=${_workoutItems.length}', name: 'DefineWorkoutScreen');

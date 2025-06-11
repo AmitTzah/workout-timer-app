@@ -3,6 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 import '../models/workout_item.dart';
 import '../models/workout_type.dart';
 import '../utils/workout_item_converter.dart';
+import '../utils/boolean_converter.dart'; // Import the new converter
 
 part 'user_workout.g.dart';
 
@@ -21,6 +22,7 @@ class UserWorkout {
 
   int? selectedLevel; // Nullable, default to 1 if null
 
+  @BooleanConverter()
   bool? selectedSurvivalMode; // Nullable, default to false if null
 
   UserWorkout({

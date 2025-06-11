@@ -15,7 +15,8 @@ UserWorkout _$UserWorkoutFromJson(Map<String, dynamic> json) => UserWorkout(
           $enumDecodeNullable(_$WorkoutTypeEnumMap, json['workoutType']) ??
               WorkoutType.sequential,
       selectedLevel: (json['selectedLevel'] as num?)?.toInt(),
-      selectedSurvivalMode: json['selectedSurvivalMode'] as bool?,
+      selectedSurvivalMode: const BooleanConverter()
+          .fromJson((json['selectedSurvivalMode'] as num?)?.toInt()),
     );
 
 Map<String, dynamic> _$UserWorkoutToJson(UserWorkout instance) =>
@@ -26,7 +27,8 @@ Map<String, dynamic> _$UserWorkoutToJson(UserWorkout instance) =>
       'totalWorkoutTime': instance.totalWorkoutTime,
       'workoutType': _$WorkoutTypeEnumMap[instance.workoutType]!,
       'selectedLevel': instance.selectedLevel,
-      'selectedSurvivalMode': instance.selectedSurvivalMode,
+      'selectedSurvivalMode':
+          const BooleanConverter().toJson(instance.selectedSurvivalMode),
     };
 
 const _$WorkoutTypeEnumMap = {
