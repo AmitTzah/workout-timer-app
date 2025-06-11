@@ -274,6 +274,11 @@ This document outlines a 4-step migration plan to replace the Hive database with
         *   Run the application on an emulator or physical device.
         *   Thoroughly test every feature: create a workout, edit it, run it, check the summary, delete it. The app should start with a clean slate.
 
+*   **Current Status (As of end of Step 3):**
+    *   The application's dependency injection has been successfully switched to use the `Sqflite` repository implementations.
+    *   Extensive debugging was performed to resolve several critical issues related to data serialization (`toJson`/`fromJson`), data type mismatches (`int` vs. `bool`), and UI rendering (`Duplicate keys found`).
+    *   The application is now stable and fully functional on the SQFlite persistence layer after a full regression test.
+    *   A minor, non-critical issue with the "workout started" audio playback has been observed and will be addressed in a future task.
 *   **Git Commit Message:**
     ```
     feat(db): activate SQFlite as the primary database
