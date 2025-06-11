@@ -37,7 +37,7 @@ class WorkoutCalendar extends StatelessWidget {
       onFormatChanged: onFormatChanged,
       onPageChanged: onPageChanged,
       headerStyle: const HeaderStyle(
-        formatButtonVisible: true,
+        formatButtonVisible: false,
         titleCentered: true,
       ),
       calendarStyle: const CalendarStyle(
