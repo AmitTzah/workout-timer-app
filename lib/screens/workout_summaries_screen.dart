@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:workout_timer_app/models/workout_summary.dart';
 import 'package:workout_timer_app/repositories/workout_summary_repository.dart';
-import 'package:workout_timer_app/screens/workout_calendar_screen.dart'; // Use the new repository
-import 'dart:ui' as ui; // Import for TextDirection
-// Import WorkoutType
-
-import 'package:intl/intl.dart'; // For date formatting
+import 'package:workout_timer_app/screens/workout_calendar_screen.dart';
+import 'package:workout_timer_app/widgets/workout_summary/workout_summary_details_card.dart';
 
 class WorkoutSummariesScreen extends StatefulWidget {
   final WorkoutSummary? highlightedSummary;
@@ -21,56 +18,15 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
   final ScrollController _scrollController = ScrollController();
   String? _expandedWorkoutName;
   late Map<String, List<WorkoutSummary>> _groupedSummaries;
-  final TextEditingController _noteTextController = TextEditingController();
-  static const int _characterLimit = 1000;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _workoutSummaryRepository = Provider.of<WorkoutSummaryRepository>(context);
-    // No longer initialize _groupedSummaries here, it will be handled by StreamBuilder
     if (widget.highlightedSummary != null) {
       _expandedWorkoutName = widget.highlightedSummary!.workoutName;
     }
   }
-
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
-    final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return '${twoDigits(duration.inHours)}:$minutes:$seconds';
-  }
-
-  Future<bool?> _confirmDismiss(
-    BuildContext context,
-    String workoutName, {
-    bool deleteAll = false,
-  }) async {
-    return showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Confirm Deletion'),
-          content: Text(
-            deleteAll
-                ? 'Are you sure you want to delete all summaries for "$workoutName"?'
-                : 'Are you sure you want to delete this workout summary?',
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Delete'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
 
   Map<String, List<WorkoutSummary>> _groupSummaries(
     List<WorkoutSummary> summaries,
@@ -83,234 +39,10 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
         grouped[summary.workoutName] = [summary];
       }
     }
-    // Sort summaries within each group by date, newest first
     for (final key in grouped.keys) {
       grouped[key]!.sort((a, b) => b.date.compareTo(a.date));
     }
     return grouped;
-  }
-
-  Widget _buildSummaryDetails(WorkoutSummary summary) {
-    return Dismissible(
-      key: ValueKey('${summary.workoutName}-${summary.date.toIso8601String()}'), // Assign a truly unique key
-      direction: DismissDirection.endToStart,
-      background: Container(
-        color: Colors.red,
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        child: const Icon(Icons.delete, color: Colors.white),
-      ),
-      confirmDismiss: (direction) =>
-          _confirmDismiss(context, summary.workoutName),
-      onDismissed: (direction) {
-        _workoutSummaryRepository.deleteWorkoutSummary(summary.id!);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Workout summary for "${summary.workoutName}" deleted',
-            ),
-          ),
-        );
-      },
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Date: ${DateFormat('yyyy-MM-dd HH:mm').format(summary.date)}',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              Text('Duration: ${_formatDuration(summary.totalDuration)}'),
-              if (summary.workoutLevel > 1)
-                Text('Level: ${summary.workoutLevel}'),
-              if (summary.isSurvivalMode) const Text('Mode: Survival'),
-              Text(
-                'Sets Order: ${summary.workoutType.toString().split('.').last == 'alternating' ? 'Alternating' : 'Sequential'}',
-              ),
-              Text('Total Sets Performed: ${summary.totalSets}'),
-              if (summary.wasStoppedPrematurely)
-                const Text('Status: Stopped Early'),
-              const SizedBox(height: 16),
-              ExpansionTile(
-                title: Text(
-                  'Workout Plan Performed',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                subtitle: Text('Tap to see details'),
-                collapsedBackgroundColor: Colors.blue[50],
-                backgroundColor: Colors.blue[100],
-                iconColor: Colors.blue[800],
-                collapsedIconColor: Colors.blue[800],
-                tilePadding: const EdgeInsets.symmetric(horizontal: 16.0),
-                childrenPadding: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8.0,
-                ),
-                children: summary.performedSets.map((workoutSet) {
-                  final content = workoutSet.isRestBlock
-                      ? '- Rest Block (${workoutSet.restBlockDuration}s)'
-                      : workoutSet.isRestSet
-                      ? '- Rest (after ${workoutSet.exercise.name} Set ${workoutSet.setNumber}) Duration: ${workoutSet.exercise.restTimeInSeconds ?? 0}s'
-                      : '- ${workoutSet.exercise.name} (Set ${workoutSet.setNumber} / ${workoutSet.exercise.sets})'
-                            '${workoutSet.exercise.reps != null ? ', Reps: ${workoutSet.exercise.reps}' : ''}'
-                            ' | Work: ${workoutSet.exercise.workTimeInSeconds}s';
-
-                  final style = workoutSet.isRestBlock || workoutSet.isRestSet
-                      ? Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontStyle: FontStyle.italic,
-                        )
-                      : Theme.of(context).textTheme.bodyLarge;
-
-                  return Padding(
-                    key: ValueKey(workoutSet.id), // Add unique key here
-                    padding: const EdgeInsets.only(left: 16.0, bottom: 8.0),
-                    child: Text(content, style: style),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 16),
-              summary.notes != null && summary.notes!.isNotEmpty
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Notes:',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.edit),
-                              onPressed: () => _showNoteEditDialog(summary),
-                              tooltip: 'Edit Note',
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        _buildNoteDisplay(summary.notes!),
-                      ],
-                    )
-                  : Align(
-                      alignment: Alignment.centerLeft,
-                      child: TextButton.icon(
-                        icon: const Icon(Icons.add),
-                        label: const Text('Add Workout Note'),
-                        onPressed: () => _showNoteEditDialog(summary),
-                      ),
-                    ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNoteDisplay(String note) {
-    const int maxLinesPreview = 4;
-    final TextPainter textPainter = TextPainter(
-      text: TextSpan(
-        text: note,
-        style: Theme.of(context).textTheme.bodyLarge,
-      ),
-      maxLines: maxLinesPreview,
-      textDirection: ui.TextDirection.ltr,
-    )..layout(maxWidth: MediaQuery.of(context).size.width - 64); // Adjust for padding
-
-    final bool isTruncated = textPainter.didExceedMaxLines;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          note,
-          maxLines: isTruncated ? maxLinesPreview : null,
-          overflow: isTruncated ? TextOverflow.ellipsis : TextOverflow.visible,
-          style: Theme.of(context).textTheme.bodyLarge,
-        ),
-        if (isTruncated)
-          TextButton(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text('Full Workout Note'),
-                    content: SingleChildScrollView(
-                      child: Text(note),
-                    ),
-                    actions: <Widget>[
-                      TextButton(
-                        child: const Text('Close'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-            child: const Text('Show More'),
-          ),
-      ],
-    );
-  }
-
-  void _showNoteEditDialog(WorkoutSummary summary) {
-    _noteTextController.text = summary.notes ?? '';
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Workout Note'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                TextFormField(
-                  controller: _noteTextController,
-                  maxLines: null,
-                  keyboardType: TextInputType.multiline,
-                  maxLength: _characterLimit,
-                  decoration: const InputDecoration(
-                    hintText: 'How did it feel? Note any PBs, pain, or equipment used.',
-                    labelText: 'Your Workout Note',
-                    border: OutlineInputBorder(),
-                  ),
-                  onChanged: (text) {
-                    // No need for setState here, maxLength handles the counter
-                  },
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Save'),
-              onPressed: () {
-                _saveNote(summary, _noteTextController.text);
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 
   Future<void> _saveNote(WorkoutSummary summary, String note) async {
@@ -326,16 +58,17 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
       wasStoppedPrematurely: summary.wasStoppedPrematurely,
       totalSets: summary.totalSets,
       completionDetails: summary.completionDetails,
-      notes: note.isEmpty ? null : note, // Save null if empty
+      notes: note.isEmpty ? null : note,
     );
     await _workoutSummaryRepository.saveWorkoutSummary(updatedSummary);
-    if (!mounted) return; // Check if the widget is still mounted
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(note.isEmpty ? 'Note cleared' : 'Note saved!'),
       ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -388,7 +121,6 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
                   ),
             );
 
-
           return ListView.builder(
             controller: _scrollController,
             itemCount: sortedWorkoutNames.length,
@@ -409,15 +141,31 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
                       }
                     });
                   },
-                  title: Text(
-                    workoutName,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
+                  title: Row(
+                    children: [
+                      Text(
+                        workoutName,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      if (workoutSummaries.any((s) => s.notes != null && s.notes!.isNotEmpty))
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Icon(Icons.notes, size: 20, color: Theme.of(context).colorScheme.primary),
                         ),
+                    ],
                   ),
                   subtitle: Text('${workoutSummaries.length} workout(s)'),
-                  children:
-                      workoutSummaries.map(_buildSummaryDetails).toList(),
+                  children: workoutSummaries.map((summary) {
+                    return WorkoutSummaryDetailsCard(
+                      summary: summary,
+                      onDelete: (id) {
+                        _workoutSummaryRepository.deleteWorkoutSummary(id);
+                      },
+                      onSaveNote: _saveNote,
+                    );
+                  }).toList(),
                 ),
               );
             },
