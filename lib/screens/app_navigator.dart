@@ -24,23 +24,11 @@ class _AppNavigatorState extends State<AppNavigator> {
   late WorkoutSummaryRepository _workoutSummaryRepository;
   late BackupService _backupService;
 
-  late final List<Widget> _widgetOptions;
-
   static const List<String> _appBarTitles = <String>[
     'Workouts',
     'Calendar',
     'Workout Summaries',
   ];
-
-  @override
-  void initState() {
-    super.initState();
-    _widgetOptions = <Widget>[
-      const HomeScreen(),
-      WorkoutCalendarScreen(onNavigateToHistory: _navigateToHistoryWithHighlight),
-      WorkoutSummariesScreen(highlightedSummary: _highlightedSummary),
-    ];
-  }
 
   @override
   void didChangeDependencies() {
@@ -63,7 +51,6 @@ class _AppNavigatorState extends State<AppNavigator> {
       _selectedIndex = 2; // Index for WorkoutSummariesScreen
       _highlightedSummary = summary;
       _isNavigatedFromCalendar = true; // Set flag when navigating from calendar
-      _widgetOptions[2] = WorkoutSummariesScreen(highlightedSummary: _highlightedSummary);
     });
   }
 
@@ -114,7 +101,14 @@ class _AppNavigatorState extends State<AppNavigator> {
               ]
             : null,
       ),
-      body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: [
+          const HomeScreen(),
+          WorkoutCalendarScreen(onNavigateToHistory: _navigateToHistoryWithHighlight),
+          WorkoutSummariesScreen(highlightedSummary: _highlightedSummary),
+        ],
+      ),
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
           splashFactory: InkRipple.splashFactory,
