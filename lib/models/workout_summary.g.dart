@@ -20,6 +20,7 @@ WorkoutSummary _$WorkoutSummaryFromJson(Map<String, dynamic> json) =>
       totalSets: (json['totalSets'] as num).toInt(),
       completionDetails:
           _completionDetailsFromJson(json['completionDetails'] as String?),
+      notes: json['notes'] as String?,
       id: (json['id'] as num?)?.toInt(),
     );
 
@@ -35,6 +36,7 @@ Map<String, dynamic> _$WorkoutSummaryToJson(WorkoutSummary instance) =>
       'wasStoppedPrematurely': _boolToInt(instance.wasStoppedPrematurely),
       'totalSets': instance.totalSets,
       'completionDetails': _completionDetailsToJson(instance.completionDetails),
+      'notes': instance.notes,
       'id': instance.id,
     };
 

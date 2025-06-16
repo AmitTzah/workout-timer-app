@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:workout_timer_app/models/workout_summary.dart';
 import 'package:workout_timer_app/repositories/workout_summary_repository.dart';
 import 'package:workout_timer_app/screens/workout_calendar_screen.dart'; // Use the new repository
+import 'dart:ui' as ui; // Import for TextDirection
 // Import WorkoutType
 
 import 'package:intl/intl.dart'; // For date formatting
@@ -20,6 +21,8 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
   final ScrollController _scrollController = ScrollController();
   String? _expandedWorkoutName;
   late Map<String, List<WorkoutSummary>> _groupedSummaries;
+  final TextEditingController _noteTextController = TextEditingController();
+  static const int _characterLimit = 1000;
 
   @override
   void didChangeDependencies() {
@@ -171,9 +174,165 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
                   );
                 }).toList(),
               ),
+              const SizedBox(height: 16),
+              summary.notes != null && summary.notes!.isNotEmpty
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Notes:',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.edit),
+                              onPressed: () => _showNoteEditDialog(summary),
+                              tooltip: 'Edit Note',
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        _buildNoteDisplay(summary.notes!),
+                      ],
+                    )
+                  : Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        icon: const Icon(Icons.add),
+                        label: const Text('Add Workout Note'),
+                        onPressed: () => _showNoteEditDialog(summary),
+                      ),
+                    ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildNoteDisplay(String note) {
+    const int maxLinesPreview = 4;
+    final TextPainter textPainter = TextPainter(
+      text: TextSpan(
+        text: note,
+        style: Theme.of(context).textTheme.bodyLarge,
+      ),
+      maxLines: maxLinesPreview,
+      textDirection: ui.TextDirection.ltr,
+    )..layout(maxWidth: MediaQuery.of(context).size.width - 64); // Adjust for padding
+
+    final bool isTruncated = textPainter.didExceedMaxLines;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          note,
+          maxLines: isTruncated ? maxLinesPreview : null,
+          overflow: isTruncated ? TextOverflow.ellipsis : TextOverflow.visible,
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        if (isTruncated)
+          TextButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Full Workout Note'),
+                    content: SingleChildScrollView(
+                      child: Text(note),
+                    ),
+                    actions: <Widget>[
+                      TextButton(
+                        child: const Text('Close'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+            child: const Text('Show More'),
+          ),
+      ],
+    );
+  }
+
+  void _showNoteEditDialog(WorkoutSummary summary) {
+    _noteTextController.text = summary.notes ?? '';
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Workout Note'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                TextFormField(
+                  controller: _noteTextController,
+                  maxLines: null,
+                  keyboardType: TextInputType.multiline,
+                  maxLength: _characterLimit,
+                  decoration: const InputDecoration(
+                    hintText: 'How did it feel? Note any PBs, pain, or equipment used.',
+                    labelText: 'Your Workout Note',
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (text) {
+                    // No need for setState here, maxLength handles the counter
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Save'),
+              onPressed: () {
+                _saveNote(summary, _noteTextController.text);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _saveNote(WorkoutSummary summary, String note) async {
+    final updatedSummary = WorkoutSummary(
+      id: summary.id,
+      date: summary.date,
+      performedSets: summary.performedSets,
+      totalDurationInSeconds: summary.totalDurationInSeconds,
+      workoutName: summary.workoutName,
+      workoutLevel: summary.workoutLevel,
+      isSurvivalMode: summary.isSurvivalMode,
+      workoutType: summary.workoutType,
+      wasStoppedPrematurely: summary.wasStoppedPrematurely,
+      totalSets: summary.totalSets,
+      completionDetails: summary.completionDetails,
+      notes: note.isEmpty ? null : note, // Save null if empty
+    );
+    await _workoutSummaryRepository.saveWorkoutSummary(updatedSummary);
+    if (!mounted) return; // Check if the widget is still mounted
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(note.isEmpty ? 'Note cleared' : 'Note saved!'),
       ),
     );
   }

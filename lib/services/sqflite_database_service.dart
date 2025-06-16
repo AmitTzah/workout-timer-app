@@ -26,8 +26,9 @@ class SqfliteDatabaseService {
     String path = join(await getDatabasesPath(), 'exercise_timer_app.db');
     return await openDatabase(
       path,
-      version: 3,
+      version: 4, // Increment version for schema migration
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade, // Add onUpgrade for schema migration
     );
   }
 
@@ -56,8 +57,16 @@ class SqfliteDatabaseService {
         workoutType TEXT NOT NULL,
         wasStoppedPrematurely INTEGER NOT NULL,
         totalSets INTEGER NOT NULL,
-        completionDetails TEXT NOT NULL
+        completionDetails TEXT,
+        notes TEXT
       )
     ''');
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 4) {
+      // Migrate from version 3 to 4: Add 'notes' column to workout_summaries
+      await db.execute('ALTER TABLE workout_summaries ADD COLUMN notes TEXT;');
+    }
   }
 }

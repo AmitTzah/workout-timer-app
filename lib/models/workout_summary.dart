@@ -32,6 +32,8 @@ class WorkoutSummary {
   @JsonKey(fromJson: _completionDetailsFromJson, toJson: _completionDetailsToJson)
   WorkoutCompletionDetails? completionDetails;
 
+ String? notes; // New field for workout notes
+
  int? id; // New field for SQFlite primary key
 
  WorkoutSummary({
@@ -45,8 +47,9 @@ class WorkoutSummary {
    required this.wasStoppedPrematurely,
    required this.totalSets,
    this.completionDetails,
+   this.notes, // Include in constructor
    this.id, // Include in constructor
- });
+  });
 
   factory WorkoutSummary.fromJson(Map<String, dynamic> json) =>
       _$WorkoutSummaryFromJson(json);
