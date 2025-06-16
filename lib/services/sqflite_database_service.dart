@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import '../repositories/default_workouts.dart';
+import '../utils/workout_item_converter.dart';
 
 class SqfliteDatabaseService {
   static final SqfliteDatabaseService _instance = SqfliteDatabaseService._internal();
@@ -61,12 +64,32 @@ class SqfliteDatabaseService {
         notes TEXT
       )
     ''');
+
+    await _insertDefaultWorkouts(db);
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 4) {
       // Migrate from version 3 to 4: Add 'notes' column to workout_summaries
       await db.execute('ALTER TABLE workout_summaries ADD COLUMN notes TEXT;');
+    }
+  }
+
+  Future<void> _insertDefaultWorkouts(Database db) async {
+    for (var workout in defaultWorkouts) {
+      await db.insert(
+        'user_workouts',
+        {
+          'id': workout.id,
+          'name': workout.name,
+          'items': jsonEncode(workout.items.map((item) => WorkoutItemConverter().toJson(item)).toList()),
+          'totalWorkoutTime': workout.totalWorkoutTime,
+          'workoutType': workout.workoutType.toString().split('.').last,
+          'selectedLevel': workout.selectedLevel,
+          'selectedSurvivalMode': workout.selectedSurvivalMode == true ? 1 : 0,
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
     }
   }
 }
