@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:workout_timer_app/models/workout_summary.dart';
+import 'package:workout_timer_app/repositories/user_workout_repository.dart';
+import 'package:workout_timer_app/repositories/workout_summary_repository.dart';
 import 'package:workout_timer_app/screens/home_screen.dart';
 import 'package:workout_timer_app/screens/workout_calendar_screen.dart';
 import 'package:workout_timer_app/screens/workout_summaries_screen.dart';
+import 'package:workout_timer_app/services/backup_service.dart';
 
 class AppNavigator extends StatefulWidget {
   const AppNavigator({super.key});
@@ -15,6 +19,10 @@ class _AppNavigatorState extends State<AppNavigator> {
   int _selectedIndex = 0;
   WorkoutSummary? _highlightedSummary;
   bool _isNavigatedFromCalendar = false;
+
+  late UserWorkoutRepository _userWorkoutRepository;
+  late WorkoutSummaryRepository _workoutSummaryRepository;
+  late BackupService _backupService;
 
   late final List<Widget> _widgetOptions;
 
@@ -32,6 +40,14 @@ class _AppNavigatorState extends State<AppNavigator> {
       WorkoutCalendarScreen(onNavigateToHistory: _navigateToHistoryWithHighlight),
       WorkoutSummariesScreen(highlightedSummary: _highlightedSummary),
     ];
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _userWorkoutRepository = Provider.of<UserWorkoutRepository>(context);
+    _workoutSummaryRepository = Provider.of<WorkoutSummaryRepository>(context);
+    _backupService = BackupService(_userWorkoutRepository, _workoutSummaryRepository);
   }
 
   void _onItemTapped(int index) {
@@ -53,6 +69,15 @@ class _AppNavigatorState extends State<AppNavigator> {
 
   @override
   Widget build(BuildContext context) {
+    void showSnackBar(String message) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(_appBarTitles[_selectedIndex]),
@@ -67,6 +92,26 @@ class _AppNavigatorState extends State<AppNavigator> {
                   });
                 },
               )
+            : null,
+        actions: _selectedIndex == 0
+            ? [
+                IconButton(
+                  icon: const Icon(Icons.upload_file),
+                  tooltip: 'Import Data',
+                  onPressed: () async {
+                    final String message = await _backupService.importData();
+                    showSnackBar(message);
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.download),
+                  tooltip: 'Export Data',
+                  onPressed: () async {
+                    final String message = await _backupService.exportData();
+                    showSnackBar(message);
+                  },
+                ),
+              ]
             : null,
       ),
       body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
