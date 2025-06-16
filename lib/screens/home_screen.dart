@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:workout_timer_app/models/user_workout.dart';
 import 'package:workout_timer_app/repositories/user_workout_repository.dart';
-import 'package:workout_timer_app/repositories/workout_summary_repository.dart';
 import 'package:workout_timer_app/screens/define_workout_screen.dart';
-import 'package:workout_timer_app/services/backup_service.dart'; // Import BackupService
 import 'package:workout_timer_app/widgets/workout_card/workout_card.dart';
 import 'package:workout_timer_app/widgets/level_selection_bottom_sheet.dart';
 
@@ -17,8 +15,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late UserWorkoutRepository _userWorkoutRepository;
-  late WorkoutSummaryRepository _workoutSummaryRepository; // Add summary repository
-  late BackupService _backupService; // Add BackupService
 
   final Map<String, int> _levelSelections = {}; // Stores int for level
   final Map<String, bool> _survivalModeSelections = {}; // Stores bool for survival mode
@@ -27,8 +23,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _userWorkoutRepository = Provider.of<UserWorkoutRepository>(context);
-    _workoutSummaryRepository = Provider.of<WorkoutSummaryRepository>(context); // Initialize summary repository
-    _backupService = BackupService(_userWorkoutRepository, _workoutSummaryRepository); // Initialize BackupService
   }
 
   @override
@@ -75,39 +69,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return formattedTime.trim();
   }
 
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Workouts'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.upload_file),
-            tooltip: 'Import Data',
-            onPressed: () async {
-              final String message = await _backupService.importData();
-              _showSnackBar(message);
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.download),
-            tooltip: 'Export Data',
-            onPressed: () async {
-              final String message = await _backupService.exportData();
-              _showSnackBar(message);
-            },
-          ),
-        ],
-      ),
       body: StreamBuilder<List<UserWorkout>>(
         stream: _userWorkoutRepository.watchAllWorkouts(),
         builder: (context, snapshot) {

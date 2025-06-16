@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:workout_timer_app/models/workout_summary.dart';
 import 'package:workout_timer_app/repositories/workout_summary_repository.dart';
-import 'package:workout_timer_app/screens/workout_calendar_screen.dart';
 import 'package:workout_timer_app/widgets/workout_summary/workout_summary_details_card.dart';
 
 class WorkoutSummariesScreen extends StatefulWidget {
@@ -73,22 +72,6 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Workout Summaries'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.calendar_today),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const WorkoutCalendarScreen(),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
       body: StreamBuilder<List<WorkoutSummary>>(
         stream: _workoutSummaryRepository.watchAllWorkoutSummaries(),
         builder: (context, snapshot) {

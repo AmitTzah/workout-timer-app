@@ -5,8 +5,9 @@ import 'package:workout_timer_app/screens/workout_summaries_screen.dart';
 
 class WorkoutEventList extends StatelessWidget {
   final List<WorkoutSummary> events;
+  final Function(WorkoutSummary)? onNavigateToHistory;
 
-  const WorkoutEventList({super.key, required this.events});
+  const WorkoutEventList({super.key, required this.events, this.onNavigateToHistory});
 
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
@@ -33,13 +34,17 @@ class WorkoutEventList extends StatelessWidget {
             subtitle: Text(
                 '${DateFormat.yMMMd().add_jm().format(summary.date)} - ${_formatDuration(summary.totalDuration)}'),
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      WorkoutSummariesScreen(highlightedSummary: summary),
-                ),
-              );
+              if (onNavigateToHistory != null) {
+                onNavigateToHistory!(summary);
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        WorkoutSummariesScreen(highlightedSummary: summary),
+                  ),
+                );
+              }
             },
           ),
         );

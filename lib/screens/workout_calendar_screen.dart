@@ -8,7 +8,8 @@ import '../models/workout_summary.dart';
 import '../repositories/workout_summary_repository.dart';
 
 class WorkoutCalendarScreen extends StatefulWidget {
-  const WorkoutCalendarScreen({super.key});
+  final Function(WorkoutSummary)? onNavigateToHistory;
+  const WorkoutCalendarScreen({super.key, this.onNavigateToHistory});
 
   @override
   WorkoutCalendarScreenState createState() => WorkoutCalendarScreenState();
@@ -70,9 +71,6 @@ class WorkoutCalendarScreenState extends State<WorkoutCalendarScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Workout Calendar'),
-      ),
       body: FutureBuilder<List<WorkoutSummary>>(
         future: _summariesFuture,
         builder: (context, snapshot) {
@@ -100,7 +98,10 @@ class WorkoutCalendarScreenState extends State<WorkoutCalendarScreen> {
                 ),
                 const SizedBox(height: 8.0),
                 Expanded(
-                  child: WorkoutEventList(events: _getEventsForDay(_selectedDay!)),
+                  child: WorkoutEventList(
+                    events: _getEventsForDay(_selectedDay!),
+                    onNavigateToHistory: widget.onNavigateToHistory,
+                  ),
                 ),
               ],
             );
