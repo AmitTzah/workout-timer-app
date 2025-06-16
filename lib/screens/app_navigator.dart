@@ -17,7 +17,7 @@ class AppNavigator extends StatefulWidget {
 
 class _AppNavigatorState extends State<AppNavigator> {
   int _selectedIndex = 0;
-  WorkoutSummary? _highlightedSummary;
+  WorkoutSummary? _summaryToHighlight;
   bool _isNavigatedFromCalendar = false;
 
   late UserWorkoutRepository _userWorkoutRepository;
@@ -41,7 +41,7 @@ class _AppNavigatorState extends State<AppNavigator> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-      _highlightedSummary = null; // Clear highlight when changing tabs
+      _summaryToHighlight = null; // Clear highlight when changing tabs
       _isNavigatedFromCalendar = false; // Reset when changing tabs
     });
   }
@@ -49,7 +49,7 @@ class _AppNavigatorState extends State<AppNavigator> {
   void _navigateToHistoryWithHighlight(WorkoutSummary summary) {
     setState(() {
       _selectedIndex = 2; // Index for WorkoutSummariesScreen
-      _highlightedSummary = summary;
+      _summaryToHighlight = summary;
       _isNavigatedFromCalendar = true; // Set flag when navigating from calendar
     });
   }
@@ -74,7 +74,7 @@ class _AppNavigatorState extends State<AppNavigator> {
                 onPressed: () {
                   setState(() {
                     _selectedIndex = 1; // Navigate back to Calendar screen
-                    _highlightedSummary = null;
+                    _summaryToHighlight = null;
                     _isNavigatedFromCalendar = false;
                   });
                 },
@@ -106,7 +106,10 @@ class _AppNavigatorState extends State<AppNavigator> {
         children: [
           const HomeScreen(),
           WorkoutCalendarScreen(onNavigateToHistory: _navigateToHistoryWithHighlight),
-          WorkoutSummariesScreen(highlightedSummary: _highlightedSummary),
+          WorkoutSummariesScreen(
+            key: _summaryToHighlight != null ? ValueKey(_summaryToHighlight!.id) : null,
+            summaryToHighlight: _summaryToHighlight,
+          ),
         ],
       ),
       bottomNavigationBar: Theme(

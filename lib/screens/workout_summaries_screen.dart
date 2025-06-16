@@ -5,8 +5,8 @@ import 'package:workout_timer_app/repositories/workout_summary_repository.dart';
 import 'package:workout_timer_app/widgets/workout_summary/workout_summary_details_card.dart';
 
 class WorkoutSummariesScreen extends StatefulWidget {
-  final WorkoutSummary? highlightedSummary;
-  const WorkoutSummariesScreen({super.key, this.highlightedSummary});
+  final WorkoutSummary? summaryToHighlight;
+  const WorkoutSummariesScreen({super.key, this.summaryToHighlight});
 
   @override
   State<WorkoutSummariesScreen> createState() => _WorkoutSummariesScreenState();
@@ -17,14 +17,27 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
   final ScrollController _scrollController = ScrollController();
   String? _expandedWorkoutName;
   late Map<String, List<WorkoutSummary>> _groupedSummaries;
+  final Map<int, GlobalKey> _summaryKeys = {}; // Map to store GlobalKeys for each summary
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _workoutSummaryRepository = Provider.of<WorkoutSummaryRepository>(context);
-    if (widget.highlightedSummary != null) {
-      _expandedWorkoutName = widget.highlightedSummary!.workoutName;
-    }
+    _workoutSummaryRepository.watchAllWorkoutSummaries().listen((summaries) {
+      _groupedSummaries = _groupSummaries(summaries);
+      // Initialize or update GlobalKeys for each summary
+      for (var workoutName in _groupedSummaries.keys) {
+        for (var summary in _groupedSummaries[workoutName]!) {
+          _summaryKeys.putIfAbsent(summary.id!, () => GlobalKey());
+        }
+      }
+      if (widget.summaryToHighlight != null) {
+        _expandedWorkoutName = widget.summaryToHighlight!.workoutName;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _scrollToHighlightedSummary();
+        });
+      }
+    });
   }
 
   Map<String, List<WorkoutSummary>> _groupSummaries(
@@ -69,6 +82,22 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
   }
 
 
+  void _scrollToHighlightedSummary() {
+    if (widget.summaryToHighlight == null || !mounted) return;
+
+    final targetSummaryId = widget.summaryToHighlight!.id;
+    final targetKey = _summaryKeys[targetSummaryId];
+
+    if (targetKey != null && targetKey.currentContext != null) {
+      Scrollable.ensureVisible(
+        targetKey.currentContext!,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+        alignment: 0.5, // Center the item
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,7 +125,7 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
               ),
             );
           }
-          _groupedSummaries = _groupSummaries(summaries);
+          // _groupedSummaries and _summaryKeys are now managed in didChangeDependencies
           final sortedWorkoutNames = _groupedSummaries.keys.toList()
             ..sort(
               (a, b) => _groupedSummaries[b]!.first.date.compareTo(
@@ -142,6 +171,7 @@ class _WorkoutSummariesScreenState extends State<WorkoutSummariesScreen> {
                   subtitle: Text('${workoutSummaries.length} workout(s)'),
                   children: workoutSummaries.map((summary) {
                     return WorkoutSummaryDetailsCard(
+                      key: _summaryKeys[summary.id!], // Pass the GlobalKey to the card
                       summary: summary,
                       onDelete: (id) {
                         _workoutSummaryRepository.deleteWorkoutSummary(id);

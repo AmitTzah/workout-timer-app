@@ -17,7 +17,6 @@ class WorkoutCalendarScreen extends StatefulWidget {
 
 class WorkoutCalendarScreenState extends State<WorkoutCalendarScreen> {
   late final WorkoutSummaryRepository _repository;
-  Future<List<WorkoutSummary>>? _summariesFuture;
   List<WorkoutSummary> _summaries = [];
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
@@ -36,9 +35,6 @@ class WorkoutCalendarScreenState extends State<WorkoutCalendarScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _repository = Provider.of<WorkoutSummaryRepository>(context, listen: false);
-    setState(() {
-      _summariesFuture = Future.value(_repository.getAllWorkoutSummaries());
-    });
   }
 
   List<WorkoutSummary> _getEventsForDay(DateTime day) {
@@ -71,11 +67,10 @@ class WorkoutCalendarScreenState extends State<WorkoutCalendarScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder<List<WorkoutSummary>>(
-        future: _summariesFuture,
+      body: StreamBuilder<List<WorkoutSummary>>(
+        stream: _repository.watchAllWorkoutSummaries(),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting &&
-              _summaries.isEmpty) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));

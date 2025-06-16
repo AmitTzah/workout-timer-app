@@ -41,7 +41,7 @@ class WorkoutEventList extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        WorkoutSummariesScreen(highlightedSummary: summary),
+                        WorkoutSummariesScreen(summaryToHighlight: summary),
                   ),
                 );
               }
