@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:workout_timer_app/models/workout_set.dart';
 // Import UserWorkout for restDurationInSeconds
 
 class WorkoutSetList extends StatelessWidget {
-  final ItemScrollController itemScrollController;
+  final Map<int, GlobalKey> itemKeys;
   final List<WorkoutSet> exercisesToPerform;
   final int currentOverallSetIndex;
   final Stream<int> currentIntervalTimeRemainingStream;
 
   const WorkoutSetList({
     super.key,
-    required this.itemScrollController,
+    required this.itemKeys,
     required this.exercisesToPerform,
     required this.currentOverallSetIndex,
     required this.currentIntervalTimeRemainingStream,
@@ -21,13 +20,19 @@ class WorkoutSetList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Flexible(
-      child: ScrollablePositionedList.builder(
-        itemScrollController: itemScrollController,
+      child: ListView.builder(
         itemCount: exercisesToPerform.length,
         itemBuilder: (context, index) {
           final workoutSet = exercisesToPerform[index];
           final isCurrent = index == currentOverallSetIndex;
+          
+          // Create or get the GlobalKey for this item
+          if (!itemKeys.containsKey(index)) {
+            itemKeys[index] = GlobalKey();
+          }
+          
           return Card(
+            key: itemKeys[index],
             color: isCurrent ? Colors.blue.shade100 : null,
             margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
             child: ListTile(

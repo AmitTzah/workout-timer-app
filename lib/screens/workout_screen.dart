@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:workout_timer_app/models/user_workout.dart';
 import 'package:workout_timer_app/services/audio_service.dart';
 import 'package:workout_timer_app/screens/workout_summary_display_screen.dart';
@@ -29,7 +28,7 @@ class WorkoutScreen extends StatefulWidget {
 
 class _WorkoutScreenState extends State<WorkoutScreen> {
   late WorkoutController _workoutController;
-  final ItemScrollController _itemScrollController = ItemScrollController();
+  final Map<int, GlobalKey> _itemKeys = {};
   int _lastOverallSetIndex =
       -1; // Track the last index to prevent redundant scrolls
 
@@ -62,11 +61,15 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       // Only animate if the current set index has actually changed
       if (_workoutController.currentOverallSetIndex != _lastOverallSetIndex) {
         _lastOverallSetIndex = _workoutController.currentOverallSetIndex;
-        if (_itemScrollController.isAttached) {
-          _itemScrollController.scrollTo(
-            index: _workoutController.currentOverallSetIndex,
+        
+        // Scroll to the current item using GlobalKey
+        final currentKey = _itemKeys[_workoutController.currentOverallSetIndex];
+        if (currentKey?.currentContext != null) {
+          Scrollable.ensureVisible(
+            currentKey!.currentContext!,
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeOut,
+            alignment: 0.5, // Center the item in the viewport
           );
         }
       }
@@ -103,7 +106,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                 totalExercisesToPerform: _workoutController.totalWorkSets,
               ),
               WorkoutSetList(
-                itemScrollController: _itemScrollController,
+                itemKeys: _itemKeys,
                 exercisesToPerform: _workoutController.exercisesToPerform,
                 currentOverallSetIndex:
                     _workoutController.currentOverallSetIndex,
