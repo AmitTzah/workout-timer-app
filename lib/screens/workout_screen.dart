@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:workout_timer_app/models/user_workout.dart';
 import 'package:workout_timer_app/services/audio_service.dart';
 import 'package:workout_timer_app/screens/workout_summary_display_screen.dart';
@@ -28,7 +29,7 @@ class WorkoutScreen extends StatefulWidget {
 
 class _WorkoutScreenState extends State<WorkoutScreen> {
   late WorkoutController _workoutController;
-  final ScrollController _scrollController = ScrollController();
+  final ItemScrollController _itemScrollController = ItemScrollController();
   int _lastOverallSetIndex =
       -1; // Track the last index to prevent redundant scrolls
 
@@ -53,7 +54,6 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   void dispose() {
     _workoutController.removeListener(_onControllerChanged);
     _workoutController.dispose();
-    _scrollController.dispose();
     super.dispose();
   }
 
@@ -62,11 +62,13 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       // Only animate if the current set index has actually changed
       if (_workoutController.currentOverallSetIndex != _lastOverallSetIndex) {
         _lastOverallSetIndex = _workoutController.currentOverallSetIndex;
-        _scrollController.animateTo(
-          _workoutController.currentOverallSetIndex * 60.0,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
+        if (_itemScrollController.isAttached) {
+          _itemScrollController.scrollTo(
+            index: _workoutController.currentOverallSetIndex,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
       }
     });
   }
@@ -101,7 +103,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                 totalExercisesToPerform: _workoutController.totalWorkSets,
               ),
               WorkoutSetList(
-                scrollController: _scrollController,
+                itemScrollController: _itemScrollController,
                 exercisesToPerform: _workoutController.exercisesToPerform,
                 currentOverallSetIndex:
                     _workoutController.currentOverallSetIndex,

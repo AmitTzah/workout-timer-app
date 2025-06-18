@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:workout_timer_app/models/workout_set.dart';
 // Import UserWorkout for restDurationInSeconds
 
 class WorkoutSetList extends StatelessWidget {
-  final ScrollController scrollController;
+  final ItemScrollController itemScrollController;
   final List<WorkoutSet> exercisesToPerform;
   final int currentOverallSetIndex;
   final Stream<int> currentIntervalTimeRemainingStream;
 
   const WorkoutSetList({
     super.key,
-    required this.scrollController,
+    required this.itemScrollController,
     required this.exercisesToPerform,
     required this.currentOverallSetIndex,
     required this.currentIntervalTimeRemainingStream,
@@ -20,8 +21,8 @@ class WorkoutSetList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Flexible(
-      child: ListView.builder(
-        controller: scrollController,
+      child: ScrollablePositionedList.builder(
+        itemScrollController: itemScrollController,
         itemCount: exercisesToPerform.length,
         itemBuilder: (context, index) {
           final workoutSet = exercisesToPerform[index];
