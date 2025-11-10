@@ -27,6 +27,10 @@ class AudioService {
     'Deadlift': 'Deadlift.wav',
     'Muscle-Ups': 'Muscle-Ups.wav',
     'Handstand Push-Ups': 'Handstand Push-Ups.wav',
+    'One Arm Pull-Up - Left': 'One Arm Pull-Up - Left.wav',
+    'One Arm Pull-Up - Right': 'One Arm Pull-Up - Right.wav',
+    'One Arm Push Up - Left': 'One Arm Push Up - Left.wav',
+    'One Arm Push Up - Right': 'One Arm Push Up - Right.wav',
   };
 
   Future<void> playNextSetSound() async {

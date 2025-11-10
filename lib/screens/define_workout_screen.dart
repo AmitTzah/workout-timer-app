@@ -47,6 +47,10 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
     'Deadlift',
     'Muscle-Ups',
     'Handstand Push-Ups',
+    'One Arm Pull-Up - Left',
+    'One Arm Pull-Up - Right',
+    'One Arm Push Up - Left',
+    'One Arm Push Up - Right',
   ];
 
   @override
