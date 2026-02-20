@@ -51,6 +51,8 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
     'One Arm Pull-Up - Right',
     'One Arm Push Up - Left',
     'One Arm Push Up - Right',
+    'Deep Squat Jumps',
+    'Running',
   ];
 
   @override
@@ -87,9 +89,7 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
     if (newExercise != null) {
       setState(() {
         if (_workoutType == WorkoutType.sequential) {
-          _workoutItems.add(
-            newExercise,
-          );
+          _workoutItems.add(newExercise);
         } else {
           AlternatingGroupItem? lastGroup;
           if (_workoutItems.isNotEmpty &&
@@ -233,39 +233,40 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
                           });
                         }
                       },
-                      decoration:
-                          const InputDecoration(labelText: 'Exercise Name'),
+                      decoration: const InputDecoration(
+                        labelText: 'Exercise Name',
+                      ),
                     ),
                     TextField(
                       controller: setsController,
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(labelText: 'Sets'),
                     ),
-                TextField(
-                  controller: repsController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Reps (Optional)',
-                  ),
-                ),
-                TextField(
-                  controller: workTimeController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Work Time (seconds)',
-                  ),
-                ),
-                TextField(
-                  controller: restTimeController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Rest Time (seconds, Optional)',
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
+                    TextField(
+                      controller: repsController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Reps (Optional)',
+                      ),
+                    ),
+                    TextField(
+                      controller: workTimeController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Work Time (seconds)',
+                      ),
+                    ),
+                    TextField(
+                      controller: restTimeController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Rest Time (seconds, Optional)',
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
             actions: <Widget>[
               TextButton(
                 child: const Text('Cancel'),
@@ -506,8 +507,7 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
       if (item is Exercise) {
         totalDuration += item.sets * item.workTimeInSeconds;
         if (item.restTimeInSeconds != null && item.sets > 1) {
-          totalDuration +=
-              (item.sets - 1) * item.restTimeInSeconds!;
+          totalDuration += (item.sets - 1) * item.restTimeInSeconds!;
         }
       } else if (item is RestBlockItem) {
         totalDuration += item.durationInSeconds;
@@ -557,13 +557,19 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
   }
 
   Future<void> _saveWorkout() async {
-    developer.log('[_saveWorkout] Attempting to save workout.', name: 'DefineWorkoutScreen');
+    developer.log(
+      '[_saveWorkout] Attempting to save workout.',
+      name: 'DefineWorkoutScreen',
+    );
 
     if (_workoutNameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a workout name.')),
       );
-      developer.log('[_saveWorkout] Workout name is empty.', name: 'DefineWorkoutScreen');
+      developer.log(
+        '[_saveWorkout] Workout name is empty.',
+        name: 'DefineWorkoutScreen',
+      );
       return;
     }
 
@@ -574,7 +580,10 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
             content: Text('Please add at least one exercise or rest block.'),
           ),
         );
-        developer.log('[_saveWorkout] Workout items list is empty.', name: 'DefineWorkoutScreen');
+        developer.log(
+          '[_saveWorkout] Workout items list is empty.',
+          name: 'DefineWorkoutScreen',
+        );
         return;
       }
 
@@ -584,7 +593,10 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
         (item) => item is AlternatingGroupItem && item.exercises.isEmpty,
       );
       if (_workoutItems.length < initialItemCount) {
-        developer.log('[_saveWorkout] Removed empty alternating groups. New item count: ${_workoutItems.length}', name: 'DefineWorkoutScreen');
+        developer.log(
+          '[_saveWorkout] Removed empty alternating groups. New item count: ${_workoutItems.length}',
+          name: 'DefineWorkoutScreen',
+        );
       }
 
       if (_workoutItems.isEmpty) {
@@ -595,7 +607,10 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
             ),
           ),
         );
-        developer.log('[_saveWorkout] Workout items list became empty after removing empty groups.', name: 'DefineWorkoutScreen');
+        developer.log(
+          '[_saveWorkout] Workout items list became empty after removing empty groups.',
+          name: 'DefineWorkoutScreen',
+        );
         return;
       }
 
@@ -611,32 +626,58 @@ class _DefineWorkoutScreenState extends State<DefineWorkoutScreen> {
         selectedSurvivalMode: false, // Initialize with a default value
       );
 
-      developer.log('[_saveWorkout] UserWorkout object created: id=$_workoutId, name=$workoutName, totalDuration=$totalDuration, workoutType=${_workoutType.name}, itemsCount=${_workoutItems.length}', name: 'DefineWorkoutScreen');
+      developer.log(
+        '[_saveWorkout] UserWorkout object created: id=$_workoutId, name=$workoutName, totalDuration=$totalDuration, workoutType=${_workoutType.name}, itemsCount=${_workoutItems.length}',
+        name: 'DefineWorkoutScreen',
+      );
 
       try {
-        developer.log('[_saveWorkout] Calling saveUserWorkout on repository...', name: 'DefineWorkoutScreen');
+        developer.log(
+          '[_saveWorkout] Calling saveUserWorkout on repository...',
+          name: 'DefineWorkoutScreen',
+        );
         await _userWorkoutRepository.saveWorkout(newWorkout);
-        developer.log('[_saveWorkout] saveUserWorkout completed successfully.', name: 'DefineWorkoutScreen');
+        developer.log(
+          '[_saveWorkout] saveUserWorkout completed successfully.',
+          name: 'DefineWorkoutScreen',
+        );
       } catch (e, stack) {
-        developer.log('[_saveWorkout] Error saving workout: $e\n$stack', name: 'DefineWorkoutScreen', error: e, stackTrace: stack);
+        developer.log(
+          '[_saveWorkout] Error saving workout: $e\n$stack',
+          name: 'DefineWorkoutScreen',
+          error: e,
+          stackTrace: stack,
+        );
         if (!mounted) {
-          developer.log('[_saveWorkout] Widget is not mounted after error. Cannot show SnackBar.', name: 'DefineWorkoutScreen');
+          developer.log(
+            '[_saveWorkout] Widget is not mounted after error. Cannot show SnackBar.',
+            name: 'DefineWorkoutScreen',
+          );
           return;
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving workout: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error saving workout: $e')));
         return;
       }
 
       if (!mounted) {
-        developer.log('[_saveWorkout] Widget is not mounted after successful save. Cannot pop navigator.', name: 'DefineWorkoutScreen');
+        developer.log(
+          '[_saveWorkout] Widget is not mounted after successful save. Cannot pop navigator.',
+          name: 'DefineWorkoutScreen',
+        );
         return;
       }
-      developer.log('[_saveWorkout] Navigating back after successful save.', name: 'DefineWorkoutScreen');
+      developer.log(
+        '[_saveWorkout] Navigating back after successful save.',
+        name: 'DefineWorkoutScreen',
+      );
       Navigator.of(context).pop();
     } else {
-      developer.log('[_saveWorkout] Form validation failed.', name: 'DefineWorkoutScreen');
+      developer.log(
+        '[_saveWorkout] Form validation failed.',
+        name: 'DefineWorkoutScreen',
+      );
     }
   }
 

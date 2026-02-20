@@ -31,6 +31,8 @@ class AudioService {
     'One Arm Pull-Up - Right': 'One Arm Pull-Up - Right.wav',
     'One Arm Push Up - Left': 'One Arm Push Up - Left.wav',
     'One Arm Push Up - Right': 'One Arm Push Up - Right.wav',
+    'Deep Squat Jumps': 'Deep-Squat-Jumps.wav',
+    'Running': 'Running.wav',
   };
 
   Future<void> playNextSetSound() async {
