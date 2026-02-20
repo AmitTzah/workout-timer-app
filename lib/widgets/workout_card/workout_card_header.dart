@@ -36,26 +36,22 @@ class WorkoutCardHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              workout.name,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleLarge
-                  ?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            Chip(
-              label: Text(
-                typeText,
-                style: const TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold),
-              ),
-              backgroundColor: typeColor,
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            ),
-          ],
+        Text(
+          workout.name,
+          style: Theme.of(context)
+              .textTheme
+              .titleLarge
+              ?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 4),
+        Chip(
+          label: Text(
+            typeText,
+            style: const TextStyle(
+                color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: typeColor,
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
         ),
         const SizedBox(height: 8),
         Text(
