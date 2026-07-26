@@ -11,6 +11,14 @@ A Flutter app for creating, managing, and performing custom workout routines wit
 
 Pre-built APKs are available on the [Releases page](https://github.com/AmitTzah/workout-timer-app/releases). Download the latest `app-release.apk` and install it on your Android device.
 
+## Platforms
+
+| Platform | Status |
+|----------|--------|
+| Android | ✅ Tested — pre-built APK available in [Releases](https://github.com/AmitTzah/workout-timer-app/releases) |
+| iOS | ⚠️ Should work (pure Flutter, no platform-specific code) — not yet tested |
+| Linux / macOS / Windows / Web | Not tested, but builds are configured |
+
 ## Features
 
 - **Custom Workouts** — Create workouts with any combination of exercises, sets, reps, work time, and rest periods
