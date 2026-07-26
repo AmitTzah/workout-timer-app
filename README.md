@@ -1,43 +1,64 @@
-# Exercise Timer App
+# Workout Timer
 
-A Flutter-based timer application for custom workout routines.
+A Flutter app for creating, managing, and performing custom workout routines with guided audio timers.
+
+<p align="center">
+  <img src="Screenshot1.jpg" alt="Workout Timer Screenshot 1" width="30%">
+  <img src="Screenshot2.jpg" alt="Workout Timer Screenshot 2" width="30%">
+</p>
+
+## Download
+
+Pre-built APKs are available on the [Releases page](https://github.com/AmitTzah/workout-timer-app/releases). Download the latest `app-release.apk` and install it on your Android device.
 
 ## Features
 
-*   **Custom Workouts:** Create and save your own workout routines with flexible sets, reps, and rest periods.
-*   **Flexible Timer:** A robust timer that guides you through your workout, providing audio cues for transitions and completion.
-*   **Workout History:** Keep track of your completed workouts with detailed summaries.
-*   **Data Management:** Easily export your workout data to a JSON file for backup or sharing, and import data from a JSON file to restore or transfer your routines.
+- **Custom Workouts** — Create workouts with any combination of exercises, sets, reps, work time, and rest periods
+- **Two Workout Modes** — Sequential (one exercise at a time) or Alternating (cycle between grouped exercises)
+- **Guided Audio Timer** — Voice announcements for exercise changes, rest periods, and workout completion
+- **Workout History** — Browse past workouts with detailed summaries including sets performed and duration
+- **Calendar View** — Visual calendar showing when you worked out and what you did
+- **Level System** — Scale workout intensity with configurable difficulty levels
+- **Survival Mode** — Adaptive mode that increases difficulty as you progress through sets
+- **Workout Notes** — Add and edit notes on completed workout summaries
+- **Data Backup** — Export your workouts and history to JSON, or import from a backup file
 
 ## Tech Stack
 
-*   **Framework:** Flutter
-*   **Database:** SQFlite - for local data persistence.
-*   **State Management:** Provider - for efficient and scalable state management.
-*   **Audio Playback:** `audioplayers` - for workout cues and completion sounds.
-*   **File Operations:** `path_provider` and `file_picker` - for handling local file paths and user-selected files for import/export.
-*   **JSON Serialization:** `json_serializable` - for converting data models to and from JSON.
+| Component | Technology |
+|-----------|-----------|
+| Framework | Flutter |
+| Database | SQFlite (SQLite) |
+| State Management | Provider |
+| Audio | `audioplayers` |
+| Calendar | `table_calendar` |
+| File I/O | `file_picker` + `path_provider` |
+| Serialization | `json_serializable` |
 
 ## Getting Started
 
-To run this project locally, ensure you have Flutter installed.
+### Prerequisites
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/AmitTzah/workout-timer-app.git
-    cd exercise_timer_app
-    ```
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) (^3.8.1)
+- Android SDK (for Android builds)
 
-2.  **Install dependencies:**
-    ```bash
-    flutter pub get
-    ```
+### Build from Source
 
-3.  **Run the application:**
-    ```bash
-    flutter run
-    ```
+```bash
+git clone https://github.com/AmitTzah/workout-timer-app.git
+cd workout-timer-app
+flutter pub get
+flutter run
+```
 
-## Contributing
+To build a release APK:
 
-Contributions are welcome! Please feel free to open issues or submit pull requests.
+```bash
+flutter build apk --release
+```
+
+The APK will be at `build/app/outputs/flutter-apk/app-release.apk`.
+
+## License
+
+MIT — see [LICENSE](LICENSE) for details.
