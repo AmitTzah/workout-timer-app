@@ -24,7 +24,7 @@ To run this project locally, ensure you have Flutter installed.
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/AmitTzah/exercise_timer_app.git
+    git clone https://github.com/AmitTzah/workout-timer-app.git
     cd exercise_timer_app
     ```
 
